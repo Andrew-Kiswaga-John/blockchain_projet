@@ -1,0 +1,90 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Hyperledger Fabric generated files
+network/organizations/
+network/crypto-config/
+network/channel-artifacts/
+network/system-genesis-block/
+network/*.tar.gz
+network/*.block
+network/*.tx
+
+# Chaincode packages
+*.tar.gz
+chaincode/**/*.tar.gz
+
+# Docker volumes and data
+*.log
+logs/
+
+# Hyperledger Fabric binaries (should be downloaded locally)
+bin/
+config/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS files
+Thumbs.db
+desktop.ini
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Wallet and identity files (contain private keys)
+wallet/
+**/wallet/
+*.id
+
+# Build outputs
+dist/
+build/
+out/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# API environment
+api/.env
+api/wallet/
+api/node_modules/
+
+# Dashboard/Frontend
+dashboard/node_modules/
+dashboard/build/
+dashboard/dist/
+dashboard/.env
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Certificate backups (keep only crypto-config.yaml for regeneration)
+*.pem.bak
+*.key.bak
+
+# Performance test results
+benchmark-results/
+performance-data/
+*.csv
+*.json.bak
