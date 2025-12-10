@@ -42,6 +42,199 @@ Expérimentation : Expérimenter 2 nouveaux mécanismes de consensus (ex. PBFT m
 
 Comparer la performance de ces consensus avec des métriques bien déterminées.
 
+---
+
+## TRAFFIC CORE - DETAILED ARCHITECTURE
+
+### Network Configuration
+- **Environment**: Hyperledger Fabric (installed in ~/hyperledger-fabric on Ubuntu-22.04 via WSL)
+- **Development**: Windows with WSL integration
+- **Chaincode Language**: JavaScript
+- **Channels**: 2
+- **Organizations**: 5 peer organizations + 1 orderer organization
+- **Minimum Peers**: 2 per organization
+
+### Organizations Structure
+
+#### 🟦 1. Traffic Authority
+**Role**: Manager of global traffic rules + governance
+**Components**:
+- 2 Peers (peer0, peer1)
+- Certificate Authority (CA)
+- Admin API for traffic rules
+- Event listeners for anomalies
+**Responsibilities**:
+- Define and enforce traffic regulations
+- Monitor network-wide traffic conditions
+- Validate policy compliance
+- Coordinate with all organizations
+
+#### 🟧 2. Vehicle Operator
+**Role**: Represents vehicles, taxis, scooters, buses, etc.
+**Components**:
+- 2 Peers (peer0, peer1)
+- CA for vehicles/agents
+- Node.js SDK for simulation
+**Responsibilities**:
+- Register and manage vehicle identities
+- Submit vehicle position updates
+- Process route requests
+- Handle vehicle state transitions
+
+#### 🟩 3. Infrastructure Operator
+**Role**: Road sensors, cameras, IoT gateways
+**Components**:
+- 2 Peers (peer0, peer1)
+- IoT gateway simulator
+- Event publishing logic
+**Responsibilities**:
+- Monitor road conditions via sensors
+- Publish traffic density data
+- Manage intersection states
+- Report infrastructure status
+
+#### 🟥 4. Emergency Services
+**Role**: Privileged operations (priority lanes, alerts)
+**Components**:
+- 2 Peers (peer0, peer1)
+- Emergency API
+- Audit logs
+**Responsibilities**:
+- Issue emergency route requests
+- Clear priority lanes
+- Broadcast urgent alerts
+- Maintain incident records
+
+#### 🟫 5. Parking Management
+**Role**: Handles parking reservations + slots
+**Components**:
+- 2 Peers (peer0, peer1)
+- Parking smart contract (micro-reservation logic)
+**Responsibilities**:
+- Manage parking spot availability
+- Process parking reservations
+- Handle parking payments
+- Coordinate with traffic flow
+
+#### 🟪 6. OrdererOrg (Raft Consensus)
+**Role**: Runs RAFT cluster (ordering service)
+**Components**:
+- orderer0.example.com
+- orderer1.example.com
+- orderer2.example.com
+**Responsibilities**:
+- Order transactions into blocks
+- Maintain consensus across network
+- Ensure fault tolerance
+
+### Channel Architecture
+
+#### 🌍 Channel 1: city-traffic-global (Main Channel)
+**Purpose**: Global traffic state management
+**Members**:
+- Traffic Authority
+- Vehicle Operator
+- Infrastructure Operator
+- Emergency Services
+- Parking Management
+
+**Consensus**: RAFT (using OrdererOrg)
+
+**Data Types**:
+- Vehicle positions and movements
+- Traffic density metrics
+- Intersection states (red/yellow/green)
+- Congestion events
+- Accident reports
+- Global traffic rules and policies
+
+**Chaincode Functions**:
+- `registerVehicle(vehicleId, type, owner)`
+- `updateVehiclePosition(vehicleId, latitude, longitude, timestamp)`
+- `updateIntersectionState(intersectionId, state, duration)`
+- `reportTrafficDensity(roadId, density, timestamp)`
+- `queryVehiclesByArea(latitude, longitude, radius)`
+- `queryIntersectionState(intersectionId)`
+- `reportCongestion(roadId, level, timestamp)`
+
+#### 🚨 Channel 2: emergency-channel (Priority Channel)
+**Purpose**: High-priority emergency operations
+**Members**:
+- Emergency Services (admin)
+- Traffic Authority
+- Infrastructure Operator
+
+**Consensus**: RAFT (can be modified for experimentation)
+
+**Data Types**:
+- Emergency incidents
+- Priority route reservations
+- Traffic controller override commands
+- Emergency vehicle locations
+- Alert broadcasts
+
+**Chaincode Functions**:
+- `createEmergencyIncident(incidentId, type, location, priority)`
+- `requestPriorityRoute(vehicleId, origin, destination)`
+- `overrideTrafficSignal(intersectionId, state, duration)`
+- `broadcastEmergencyAlert(message, area, level)`
+- `clearPriorityRoute(routeId)`
+- `queryActiveIncidents(area)`
+
+### Dashboard Features
+**Technology Stack**: Web-based (React/Vue.js + Node.js backend)
+
+**Map Integration**: 
+- **Option 1**: Mapbox GL JS (realistic, customizable)
+- **Option 2**: Leaflet with OpenStreetMap
+- **Option 3**: Google Maps API
+
+**Real-time Visualization**:
+- Vehicle positions with real-time updates
+- Traffic density heatmap
+- Intersection signal states
+- Emergency incidents markers
+- Parking availability indicators
+- Route visualization
+- Blockchain transaction stream
+
+**Interactive Controls**:
+- Add/remove vehicles
+- Trigger emergency scenarios
+- Adjust traffic signal timing
+- View transaction history
+- Monitor consensus metrics
+- Simulate attacks (data falsification, consensus violations)
+
+### Consensus Experimentation
+As required by the project, implement and compare:
+
+1. **RAFT (Baseline)**: Current ordering service
+   - Metrics: Throughput (TPS), latency, fault tolerance
+   
+2. **Modified PBFT**: 
+   - Adapt for traffic-specific validation
+   - Metrics: Byzantine fault tolerance, transaction finality time
+   
+3. **Proof of Authority (PoA)**:
+   - Use trusted organizations as validators
+   - Metrics: Energy efficiency, transaction speed
+
+**Performance Metrics**:
+- Transactions per second (TPS)
+- Block creation time
+- Transaction latency
+- Network overhead
+- Fault recovery time
+- Consensus message complexity
+
+### Attack Simulation Scenarios
+1. **Data Falsification**: Alter vehicle positions in ledger
+2. **Consensus Attack**: Introduce malicious orderer
+3. **Double-spending**: Attempt to reserve same parking spot twice
+4. **Replay Attack**: Resubmit old transactions
+5. **Sybil Attack**: Create multiple fake vehicle identities
+
 SOUS-PROJET 2 : ADAPTIVE SIGNAL CONTROL 
 
 Développer un système de feux de circulation intelligents synchronisés via la blockchain.

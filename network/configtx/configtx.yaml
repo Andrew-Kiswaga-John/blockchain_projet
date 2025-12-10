@@ -1,0 +1,372 @@
+# ==============================================================================
+# Channel Configuration for Traffic Core Smart City Network
+# ==============================================================================
+# This file defines:
+# - Organizations and their MSPs
+# - Orderer configuration (RAFT consensus)
+# - Channel profiles for both channels
+# - Policies for access control
+# ==============================================================================
+
+---
+# ==============================================================================
+# ORGANIZATIONS
+# ==============================================================================
+Organizations:
+  # ----------------------------------------------------------------------------
+  # Orderer Organization
+  # ----------------------------------------------------------------------------
+  - &OrdererOrg
+      Name: OrdererOrg
+      ID: OrdererMSP
+      MSPDir: ../organizations/ordererOrganizations/example.com/msp
+      
+      Policies:
+        Readers:
+          Type: Signature
+          Rule: "OR('OrdererMSP.member')"
+        Writers:
+          Type: Signature
+          Rule: "OR('OrdererMSP.member')"
+        Admins:
+          Type: Signature
+          Rule: "OR('OrdererMSP.admin')"
+      
+      OrdererEndpoints:
+        - orderer0.example.com:7050
+        - orderer1.example.com:8050
+        - orderer2.example.com:9050
+
+  # ----------------------------------------------------------------------------
+  # Traffic Authority Organization
+  # ----------------------------------------------------------------------------
+  - &TrafficAuthority
+      Name: TrafficAuthorityMSP
+      ID: TrafficAuthorityMSP
+      MSPDir: ../organizations/peerOrganizations/trafficauthority.example.com/msp
+      
+      Policies:
+        Readers:
+          Type: Signature
+          Rule: "OR('TrafficAuthorityMSP.admin', 'TrafficAuthorityMSP.peer', 'TrafficAuthorityMSP.client')"
+        Writers:
+          Type: Signature
+          Rule: "OR('TrafficAuthorityMSP.admin', 'TrafficAuthorityMSP.client')"
+        Admins:
+          Type: Signature
+          Rule: "OR('TrafficAuthorityMSP.admin')"
+        Endorsement:
+          Type: Signature
+          Rule: "OR('TrafficAuthorityMSP.peer')"
+      
+      AnchorPeers:
+        - Host: peer0.trafficauthority.example.com
+          Port: 7051
+
+  # ----------------------------------------------------------------------------
+  # Vehicle Operator Organization
+  # ----------------------------------------------------------------------------
+  - &VehicleOperator
+      Name: VehicleOperatorMSP
+      ID: VehicleOperatorMSP
+      MSPDir: ../organizations/peerOrganizations/vehicleoperator.example.com/msp
+      
+      Policies:
+        Readers:
+          Type: Signature
+          Rule: "OR('VehicleOperatorMSP.admin', 'VehicleOperatorMSP.peer', 'VehicleOperatorMSP.client')"
+        Writers:
+          Type: Signature
+          Rule: "OR('VehicleOperatorMSP.admin', 'VehicleOperatorMSP.client')"
+        Admins:
+          Type: Signature
+          Rule: "OR('VehicleOperatorMSP.admin')"
+        Endorsement:
+          Type: Signature
+          Rule: "OR('VehicleOperatorMSP.peer')"
+      
+      AnchorPeers:
+        - Host: peer0.vehicleoperator.example.com
+          Port: 9051
+
+  # ----------------------------------------------------------------------------
+  # Infrastructure Operator Organization
+  # ----------------------------------------------------------------------------
+  - &InfrastructureOperator
+      Name: InfrastructureOperatorMSP
+      ID: InfrastructureOperatorMSP
+      MSPDir: ../organizations/peerOrganizations/infrastructure.example.com/msp
+      
+      Policies:
+        Readers:
+          Type: Signature
+          Rule: "OR('InfrastructureOperatorMSP.admin', 'InfrastructureOperatorMSP.peer', 'InfrastructureOperatorMSP.client')"
+        Writers:
+          Type: Signature
+          Rule: "OR('InfrastructureOperatorMSP.admin', 'InfrastructureOperatorMSP.client')"
+        Admins:
+          Type: Signature
+          Rule: "OR('InfrastructureOperatorMSP.admin')"
+        Endorsement:
+          Type: Signature
+          Rule: "OR('InfrastructureOperatorMSP.peer')"
+      
+      AnchorPeers:
+        - Host: peer0.infrastructure.example.com
+          Port: 11051
+
+  # ----------------------------------------------------------------------------
+  # Emergency Services Organization
+  # ----------------------------------------------------------------------------
+  - &EmergencyServices
+      Name: EmergencyServicesMSP
+      ID: EmergencyServicesMSP
+      MSPDir: ../organizations/peerOrganizations/emergency.example.com/msp
+      
+      Policies:
+        Readers:
+          Type: Signature
+          Rule: "OR('EmergencyServicesMSP.admin', 'EmergencyServicesMSP.peer', 'EmergencyServicesMSP.client')"
+        Writers:
+          Type: Signature
+          Rule: "OR('EmergencyServicesMSP.admin', 'EmergencyServicesMSP.client')"
+        Admins:
+          Type: Signature
+          Rule: "OR('EmergencyServicesMSP.admin')"
+        Endorsement:
+          Type: Signature
+          Rule: "OR('EmergencyServicesMSP.peer')"
+      
+      AnchorPeers:
+        - Host: peer0.emergency.example.com
+          Port: 13051
+
+  # ----------------------------------------------------------------------------
+  # Parking Management Organization
+  # ----------------------------------------------------------------------------
+  - &ParkingManagement
+      Name: ParkingManagementMSP
+      ID: ParkingManagementMSP
+      MSPDir: ../organizations/peerOrganizations/parking.example.com/msp
+      
+      Policies:
+        Readers:
+          Type: Signature
+          Rule: "OR('ParkingManagementMSP.admin', 'ParkingManagementMSP.peer', 'ParkingManagementMSP.client')"
+        Writers:
+          Type: Signature
+          Rule: "OR('ParkingManagementMSP.admin', 'ParkingManagementMSP.client')"
+        Admins:
+          Type: Signature
+          Rule: "OR('ParkingManagementMSP.admin')"
+        Endorsement:
+          Type: Signature
+          Rule: "OR('ParkingManagementMSP.peer')"
+      
+      AnchorPeers:
+        - Host: peer0.parking.example.com
+          Port: 15051
+
+# ==============================================================================
+# CAPABILITIES
+# ==============================================================================
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+# ==============================================================================
+# APPLICATION DEFAULTS
+# ==============================================================================
+Application: &ApplicationDefaults
+  Organizations:
+  
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+# ==============================================================================
+# ORDERER DEFAULTS
+# ==============================================================================
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  
+  Addresses:
+    - orderer0.example.com:7050
+    - orderer1.example.com:8050
+    - orderer2.example.com:9050
+  
+  EtcdRaft:
+    Consenters:
+      - Host: orderer0.example.com
+        Port: 7050
+        ClientTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer0.example.com/tls/server.crt
+        ServerTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer0.example.com/tls/server.crt
+      
+      - Host: orderer1.example.com
+        Port: 8050
+        ClientTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer1.example.com/tls/server.crt
+        ServerTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer1.example.com/tls/server.crt
+      
+      - Host: orderer2.example.com
+        Port: 9050
+        ClientTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer2.example.com/tls/server.crt
+        ServerTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer2.example.com/tls/server.crt
+  
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  
+  Organizations:
+  
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+  
+  Capabilities:
+    <<: *OrdererCapabilities
+
+# ==============================================================================
+# CHANNEL DEFAULTS
+# ==============================================================================
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  
+  Capabilities:
+    <<: *ChannelCapabilities
+
+# ==============================================================================
+# PROFILES
+# ==============================================================================
+Profiles:
+  # ----------------------------------------------------------------------------
+  # Genesis Block Profile for Orderer
+  # ----------------------------------------------------------------------------
+  TrafficCoreOrdererGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities:
+        <<: *OrdererCapabilities
+    Consortiums:
+      TrafficCoreConsortium:
+        Organizations:
+          - *TrafficAuthority
+          - *VehicleOperator
+          - *InfrastructureOperator
+          - *EmergencyServices
+          - *ParkingManagement
+
+  # ----------------------------------------------------------------------------
+  # Channel 1: city-traffic-global
+  # Purpose: Main traffic coordination channel
+  # Members: All 5 peer organizations
+  # Consensus: RAFT (via OrdererOrg)
+  # ----------------------------------------------------------------------------
+  CityTrafficGlobalChannel:
+    <<: *ChannelDefaults
+    Consortium: TrafficCoreConsortium
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *TrafficAuthority
+        - *VehicleOperator
+        - *InfrastructureOperator
+        - *EmergencyServices
+        - *ParkingManagement
+      Capabilities:
+        <<: *ApplicationCapabilities
+      Policies:
+        Readers:
+          Type: ImplicitMeta
+          Rule: "ANY Readers"
+        Writers:
+          Type: ImplicitMeta
+          Rule: "ANY Writers"
+        Admins:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Admins"
+        LifecycleEndorsement:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Endorsement"
+        Endorsement:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Endorsement"
+
+  # ----------------------------------------------------------------------------
+  # Channel 2: emergency-channel
+  # Purpose: Priority emergency operations
+  # Members: Emergency Services, Traffic Authority, Infrastructure Operator
+  # Consensus: RAFT (via OrdererOrg)
+  # ----------------------------------------------------------------------------
+  EmergencyChannel:
+    <<: *ChannelDefaults
+    Consortium: TrafficCoreConsortium
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *EmergencyServices
+        - *TrafficAuthority
+        - *InfrastructureOperator
+      Capabilities:
+        <<: *ApplicationCapabilities
+      Policies:
+        Readers:
+          Type: ImplicitMeta
+          Rule: "ANY Readers"
+        Writers:
+          Type: ImplicitMeta
+          Rule: "ANY Writers"
+        Admins:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Admins"
+        LifecycleEndorsement:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Endorsement"
+        Endorsement:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Endorsement"

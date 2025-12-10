@@ -1,7 +1,7 @@
 {
-  "name": "traffic-contract",
+  "name": "emergency-contract",
   "version": "1.0.0",
-  "description": "Smart contract for traffic management and monitoring",
+  "description": "Smart contract for emergency services coordination and priority routing",
   "main": "index.js",
   "engines": {
     "node": ">=14",

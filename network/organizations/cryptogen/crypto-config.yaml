@@ -1,0 +1,89 @@
+# Crypto configuration for Traffic Core Smart City Network
+# This file defines the structure of all organizations in the network
+
+# ============================================================
+# ORDERER ORGANIZATIONS
+# ============================================================
+OrdererOrgs:
+  - Name: Orderer
+    Domain: example.com
+    EnableNodeOUs: true
+    
+    Specs:
+      - Hostname: orderer0
+      - Hostname: orderer1
+      - Hostname: orderer2
+
+# ============================================================
+# PEER ORGANIZATIONS
+# ============================================================
+PeerOrgs:
+  # ----------------------------------------------------------
+  # Traffic Authority Organization
+  # Role: Global traffic rules management and governance
+  # ----------------------------------------------------------
+  - Name: TrafficAuthority
+    Domain: trafficauthority.example.com
+    EnableNodeOUs: true
+    
+    Template:
+      Count: 2  # peer0 and peer1
+      
+    Users:
+      Count: 3  # Admin + 3 additional users
+
+  # ----------------------------------------------------------
+  # Vehicle Operator Organization
+  # Role: Represents vehicles, taxis, buses, scooters
+  # ----------------------------------------------------------
+  - Name: VehicleOperator
+    Domain: vehicleoperator.example.com
+    EnableNodeOUs: true
+    
+    Template:
+      Count: 2  # peer0 and peer1
+      
+    Users:
+      Count: 5  # Admin + 5 additional users (for various vehicle types)
+
+  # ----------------------------------------------------------
+  # Infrastructure Operator Organization
+  # Role: Road sensors, cameras, IoT gateways
+  # ----------------------------------------------------------
+  - Name: InfrastructureOperator
+    Domain: infrastructure.example.com
+    EnableNodeOUs: true
+    
+    Template:
+      Count: 2  # peer0 and peer1
+      
+    Users:
+      Count: 4  # Admin + 4 additional users (for sensor operators)
+
+  # ----------------------------------------------------------
+  # Emergency Services Organization
+  # Role: Priority operations, emergency routing, alerts
+  # ----------------------------------------------------------
+  - Name: EmergencyServices
+    Domain: emergency.example.com
+    EnableNodeOUs: true
+    
+    Template:
+      Count: 2  # peer0 and peer1
+      
+    Users:
+      Count: 3  # Admin + 3 additional users (ambulance, fire, police)
+
+  # ----------------------------------------------------------
+  # Parking Management Organization
+  # Role: Parking reservations and slot management
+  # ----------------------------------------------------------
+  - Name: ParkingManagement
+    Domain: parking.example.com
+    EnableNodeOUs: true
+    
+    Template:
+      Count: 2  # peer0 and peer1
+      
+    Users:
+      Count: 2  # Admin + 2 additional users

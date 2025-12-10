@@ -1,90 +1,67 @@
-# Node.js dependencies
+# Ignore crypto materials (will be generated)
+network/organizations/ordererOrganizations/*
+network/organizations/peerOrganizations/*
+!network/organizations/ordererOrganizations/.gitkeep
+!network/organizations/peerOrganizations/.gitkeep
+
+# Ignore generated artifacts
+network/channel-artifacts/*.block
+network/channel-artifacts/*.tx
+network/system-genesis-block/*.block
+
+# Node modules
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-yarn.lock
+application/backend/node_modules/
+application/frontend/node_modules/
+chaincode/*/node_modules/
+simulator/*/node_modules/
 
-# Hyperledger Fabric generated files
-network/organizations/
-network/crypto-config/
-network/channel-artifacts/
-network/system-genesis-block/
-network/*.tar.gz
-network/*.block
-network/*.tx
-
-# Chaincode packages
-*.tar.gz
-chaincode/**/*.tar.gz
-
-# Docker volumes and data
+# Logs
 *.log
 logs/
+application/backend/logs/
+npm-debug.log*
 
-# Hyperledger Fabric binaries (should be downloaded locally)
-bin/
-config/
-
-# Environment files
+# Environment variables
 .env
 .env.local
 .env.*.local
+application/backend/.env
+application/frontend/.env
 
-# IDE and editor files
+# Build outputs
+dist/
+build/
+application/frontend/dist/
+application/frontend/build/
+
+# Wallet files (contain private keys)
+application/backend/wallet/
+application/backend/src/wallet/
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.DS_Store
 
 # OS files
+.DS_Store
 Thumbs.db
-desktop.ini
+
+# Docker volumes
+*.tar.gz
+
+# Test coverage
+coverage/
+.nyc_output/
 
 # Temporary files
 tmp/
 temp/
 *.tmp
 
-# Wallet and identity files (contain private keys)
-wallet/
-**/wallet/
-*.id
-
-# Build outputs
-dist/
-build/
-out/
-
-# Test coverage
-coverage/
-.nyc_output/
-
-# API environment
-api/.env
-api/wallet/
-api/node_modules/
-
-# Dashboard/Frontend
-dashboard/node_modules/
-dashboard/build/
-dashboard/dist/
-dashboard/.env
-
-# Backup files
-*.bak
-*.backup
-*~
-
-# Certificate backups (keep only crypto-config.yaml for regeneration)
-*.pem.bak
-*.key.bak
-
-# Performance test results
-benchmark-results/
-performance-data/
-*.csv
-*.json.bak
+# Package lock files (optional - uncomment if not sharing)
+# package-lock.json
+# yarn.lock
