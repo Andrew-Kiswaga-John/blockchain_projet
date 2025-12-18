@@ -1,0 +1,32 @@
+.transaction-feed {
+  padding: 20px;
+}
+
+.feed-title {
+  color: #fff;
+  font-weight: 600;
+}
+
+.feed-card {
+  background: linear-gradient(135deg, #1a1f3a 0%, #2a2f4a 100%);
+  border-radius: 8px;
+}
+
+.transaction-list {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.transaction-item {
+  padding: 16px;
+  transition: background 0.2s;
+}
+
+.transaction-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tx-id {
+  font-family: 'Courier New', monospace;
+  color: #4caf50;
+}

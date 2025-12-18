@@ -1,0 +1,24 @@
+.network-stats {
+  padding: 20px;
+}
+
+.stats-title {
+  color: #fff;
+  font-weight: 600;
+}
+
+.stats-card {
+  background: linear-gradient(135deg, #1a1f3a 0%, #2a2f4a 100%);
+  border-radius: 8px;
+  height: 100%;
+}
+
+.stats-card .MuiListItem-root {
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.stats-card .MuiListItem-root:hover {
+  background: rgba(255, 255, 255, 0.06);
+}

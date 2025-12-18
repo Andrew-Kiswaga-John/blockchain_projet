@@ -1,0 +1,24 @@
+.emergency-panel {
+  padding: 20px;
+}
+
+.panel-title {
+  color: #fff;
+  font-weight: 600;
+}
+
+.emergency-card {
+  background: linear-gradient(135deg, #1a1f3a 0%, #2a2f4a 100%);
+  border-radius: 8px;
+}
+
+.emergency-item {
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.emergency-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}

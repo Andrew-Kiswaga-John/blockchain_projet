@@ -1,0 +1,25 @@
+{
+  "name": "traffic-core-backend",
+  "version": "1.0.0",
+  "description": "Hyperledger Fabric backend for Smart City Traffic Management",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": ["blockchain", "hyperledger-fabric", "smart-city", "traffic"],
+  "author": "IASD Master 2025",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "fabric-network": "^2.2.18",
+    "fabric-ca-client": "^2.2.18",
+    "socket.io": "^4.6.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

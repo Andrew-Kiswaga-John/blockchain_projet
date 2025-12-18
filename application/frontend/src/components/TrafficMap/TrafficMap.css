@@ -1,0 +1,40 @@
+.traffic-map {
+  padding: 20px;
+}
+
+.map-title {
+  color: #fff;
+  font-weight: 600;
+}
+
+.map-card {
+  background: #1a1f3a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.custom-vehicle-marker,
+.custom-emergency-marker {
+  background: transparent;
+  border: none;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #1a1f3a;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-popup-tip {
+  background: #1a1f3a;
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+  font-size: 13px;
+}
+
+.leaflet-popup-content strong {
+  color: #4caf50;
+}

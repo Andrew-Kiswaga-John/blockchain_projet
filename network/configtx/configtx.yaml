@@ -282,7 +282,7 @@ Channel: &ChannelDefaults
 # ==============================================================================
 Profiles:
   # ----------------------------------------------------------------------------
-  # Genesis Block Profile for Orderer
+  # Genesis Block Profile for Orderer (RAFT Consensus)
   # ----------------------------------------------------------------------------
   TrafficCoreOrdererGenesis:
     <<: *ChannelDefaults
@@ -292,6 +292,61 @@ Profiles:
         - *OrdererOrg
       Capabilities:
         <<: *OrdererCapabilities
+    Consortiums:
+      TrafficCoreConsortium:
+        Organizations:
+          - *TrafficAuthority
+          - *VehicleOperator
+          - *InfrastructureOperator
+          - *EmergencyServices
+          - *ParkingManagement
+
+  # ----------------------------------------------------------------------------
+  # Genesis Block Profile for Kafka Orderer (KAFKA Consensus)
+  # ----------------------------------------------------------------------------
+  TrafficCoreKafkaOrdererGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      OrdererType: kafka
+      Addresses:
+        - orderer0-kafka.example.com:10050
+        - orderer1-kafka.example.com:11050
+        - orderer2-kafka.example.com:12050
+      
+      # Kafka-specific configuration
+      Kafka:
+        Brokers:
+          - kafka0:9092
+          - kafka1:9093
+          - kafka2:9094
+          - kafka3:9095
+      
+      BatchTimeout: 2s
+      BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+      
+      Organizations:
+        - *OrdererOrg
+      
+      Policies:
+        Readers:
+          Type: ImplicitMeta
+          Rule: "ANY Readers"
+        Writers:
+          Type: ImplicitMeta
+          Rule: "ANY Writers"
+        Admins:
+          Type: ImplicitMeta
+          Rule: "MAJORITY Admins"
+        BlockValidation:
+          Type: ImplicitMeta
+          Rule: "ANY Writers"
+      
+      Capabilities:
+        <<: *OrdererCapabilities
+    
     Consortiums:
       TrafficCoreConsortium:
         Organizations:
@@ -338,12 +393,12 @@ Profiles:
           Rule: "MAJORITY Endorsement"
 
   # ----------------------------------------------------------------------------
-  # Channel 2: emergency-channel
+  # Channel 2: emergency-ops
   # Purpose: Priority emergency operations
   # Members: Emergency Services, Traffic Authority, Infrastructure Operator
   # Consensus: RAFT (via OrdererOrg)
   # ----------------------------------------------------------------------------
-  EmergencyChannel:
+  EmergencyOpsChannel:
     <<: *ChannelDefaults
     Consortium: TrafficCoreConsortium
     Application:
