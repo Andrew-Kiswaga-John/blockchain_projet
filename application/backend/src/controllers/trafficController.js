@@ -2,11 +2,11 @@ const fabricClient = require('../fabric-sdk/fabricClient');
 
 class TrafficController {
     
-    // Get all vehicles
+    // Get all vehicles (returns all intersections as we don't have vehicle tracking yet)
     async getAllVehicles(req, res) {
         try {
             const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
-            const result = await contract.evaluateTransaction('queryAllVehicles');
+            const result = await contract.evaluateTransaction('queryAllIntersections');
             
             res.json({
                 success: true,

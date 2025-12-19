@@ -1,0 +1,15 @@
+const { Gateway, Wallets, DefaultQueryHandlerStrategies } = require('fabric-network');
+const FabricCAServices = require('fabric-ca-client');
+const path = require('path');
+const fs = require('fs');
+
+...
+
+            await this.gateway.connect(connectionProfile, {
+                wallet: this.wallet,
+                identity: 'admin',
+                discovery: { enabled: false },
+                queryHandlerOptions: {
+                    strategy: DefaultQueryHandlerStrategies.MSPID_SCOPE_SINGLE
+                }
+            });

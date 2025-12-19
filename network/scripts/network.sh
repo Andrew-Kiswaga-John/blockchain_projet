@@ -106,14 +106,14 @@ function generateChannelArtifacts() {
         exit 1
     fi
     
-    # Generate channel configuration for emergency-channel
-    printInfo "Generating emergency-channel configuration..."
-    configtxgen -profile EmergencyChannel \
-        -channelID emergency-channel \
-        -outputCreateChannelTx "${CHANNEL_ARTIFACTS}/emergency-channel.tx"
+    # Generate channel configuration for emergency-ops
+    printInfo "Generating emergency-ops configuration..."
+    configtxgen -profile EmergencyOpsChannel \
+        -channelID emergency-ops \
+        -outputCreateChannelTx "${CHANNEL_ARTIFACTS}/emergency-ops.tx"
     
     if [ $? -ne 0 ]; then
-        printError "Failed to generate emergency-channel transaction"
+        printError "Failed to generate emergency-ops transaction"
         exit 1
     fi
     
@@ -127,13 +127,13 @@ function generateChannelArtifacts() {
             -asOrg ${org}MSP
     done
     
-    # Generate anchor peer updates for emergency-channel
-    printInfo "Generating anchor peer updates for emergency-channel..."
+    # Generate anchor peer updates for emergency-ops
+    printInfo "Generating anchor peer updates for emergency-ops..."
     
     for org in EmergencyServices TrafficAuthority InfrastructureOperator; do
-        configtxgen -profile EmergencyChannel \
-            -channelID emergency-channel \
-            -outputAnchorPeersUpdate "${CHANNEL_ARTIFACTS}/${org}MSPanchors-emergency-channel.tx" \
+        configtxgen -profile EmergencyOpsChannel \
+            -channelID emergency-ops \
+            -outputAnchorPeersUpdate "${CHANNEL_ARTIFACTS}/${org}MSPanchors-emergency-ops.tx" \
             -asOrg ${org}MSP
     done
     
@@ -239,7 +239,7 @@ function createChannels() {
     setGlobals TrafficAuthority 0
     
     peer channel create \
-        -o localhost:7050 \
+        -o orderer0.example.com:7050 \
         -c city-traffic-global \
         -f "${CHANNEL_ARTIFACTS}/city-traffic-global.tx" \
         --outputBlock "${CHANNEL_ARTIFACTS}/city-traffic-global.block" \
@@ -252,18 +252,18 @@ function createChannels() {
     
     sleep 2
     
-    # Create emergency-channel
-    printInfo "Creating emergency-channel..."
+    # Create emergency-ops
+    printInfo "Creating emergency-ops..."
     
     peer channel create \
-        -o localhost:7050 \
-        -c emergency-channel \
-        -f "${CHANNEL_ARTIFACTS}/emergency-channel.tx" \
-        --outputBlock "${CHANNEL_ARTIFACTS}/emergency-channel.block" \
+        -o orderer0.example.com:7050 \
+        -c emergency-ops \
+        -f "${CHANNEL_ARTIFACTS}/emergency-ops.tx" \
+        --outputBlock "${CHANNEL_ARTIFACTS}/emergency-ops.block" \
         --tls --cafile "${ORDERER_CA}"
     
     if [ $? -ne 0 ]; then
-        printError "Failed to create emergency-channel"
+        printError "Failed to create emergency-ops"
         exit 1
     fi
     
@@ -288,13 +288,13 @@ function joinChannel() {
         done
     done
     
-    # Join emergency-channel - 3 organizations
-    printInfo "Joining peers to emergency-channel..."
+    # Join emergency-ops - 3 organizations
+    printInfo "Joining peers to emergency-ops..."
     
     for org in EmergencyServices TrafficAuthority InfrastructureOperator; do
         for peer in 0 1; do
             setGlobals ${org} ${peer}
-            peer channel join -b "${CHANNEL_ARTIFACTS}/emergency-channel.block"
+            peer channel join -b "${CHANNEL_ARTIFACTS}/emergency-ops.block"
             sleep 1
         done
     done
@@ -315,22 +315,22 @@ function updateAnchorPeers() {
     for org in TrafficAuthority VehicleOperator InfrastructureOperator EmergencyServices ParkingManagement; do
         setGlobals ${org} 0
         peer channel update \
-            -o localhost:7050 \
+            -o orderer0.example.com:7050 \
             -c city-traffic-global \
             -f "${CHANNEL_ARTIFACTS}/${org}MSPanchors-city-traffic-global.tx" \
             --tls --cafile "${ORDERER_CA}"
         sleep 1
     done
     
-    # Update anchor peers for emergency-channel
-    printInfo "Updating anchor peers for emergency-channel..."
+    # Update anchor peers for emergency-ops
+    printInfo "Updating anchor peers for emergency-ops..."
     
     for org in EmergencyServices TrafficAuthority InfrastructureOperator; do
         setGlobals ${org} 0
         peer channel update \
-            -o localhost:7050 \
-            -c emergency-channel \
-            -f "${CHANNEL_ARTIFACTS}/${org}MSPanchors-emergency-channel.tx" \
+            -o orderer0.example.com:7050 \
+            -c emergency-ops \
+            -f "${CHANNEL_ARTIFACTS}/${org}MSPanchors-emergency-ops.tx" \
             --tls --cafile "${ORDERER_CA}"
         sleep 1
     done

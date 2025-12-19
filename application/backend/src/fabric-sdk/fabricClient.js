@@ -1,4 +1,4 @@
-const { Gateway, Wallets } = require('fabric-network');
+const { Gateway, Wallets, DefaultQueryHandlerStrategies } = require('fabric-network');
 const FabricCAServices = require('fabric-ca-client');
 const path = require('path');
 const fs = require('fs');
@@ -7,6 +7,7 @@ class FabricClient {
     constructor() {
         this.gateway = null;
         this.wallet = null;
+        this.networks = {};
         // Use absolute path for WSL environment
         this.networkPath = process.env.NETWORK_PATH || path.resolve(__dirname, '../../../../network');
     }
@@ -23,6 +24,9 @@ class FabricClient {
                 await this.enrollAdmin();
             }
 
+            // Connect gateway once
+            await this.connectGateway();
+
             console.log('✓ Fabric client initialized');
         } catch (error) {
             console.error('Failed to initialize Fabric client:', error);
@@ -33,12 +37,15 @@ class FabricClient {
     async enrollAdmin() {
         try {
             const orgName = 'trafficauthority';
-            const adminCertPath = `${this.networkPath}/organizations/peerOrganizations/${orgName}.example.com/users/Admin@${orgName}.example.com/msp/signcerts/Admin@${orgName}.example.com-cert.pem`;
-            const adminKeyDir = `${this.networkPath}/organizations/peerOrganizations/${orgName}.example.com/users/Admin@${orgName}.example.com/msp/keystore`;
+            const mspPath = `${this.networkPath}/organizations/peerOrganizations/${orgName}.example.com/users/Admin@${orgName}.example.com/msp`;
+            const adminCertPath = `${mspPath}/signcerts/Admin@${orgName}.example.com-cert.pem`;
+            const adminKeyDir = `${mspPath}/keystore`;
+            const caCertPath = `${mspPath}/cacerts/ca.${orgName}.example.com-cert.pem`;
             
             const certificate = fs.readFileSync(adminCertPath).toString();
             const keyFiles = fs.readdirSync(adminKeyDir);
             const privateKey = fs.readFileSync(path.join(adminKeyDir, keyFiles[0])).toString();
+            const caCert = fs.readFileSync(caCertPath).toString();
 
             const x509Identity = {
                 credentials: {
@@ -57,12 +64,14 @@ class FabricClient {
         }
     }
 
-    async connectToChannel(channelName) {
+    async connectGateway() {
         try {
-            this.gateway = new Gateway();
-            
             const orgName = 'trafficauthority';
             const peerPath = `${this.networkPath}/organizations/peerOrganizations/${orgName}.example.com`;
+            const emergencyPath = `${this.networkPath}/organizations/peerOrganizations/emergency.example.com`;
+            const infraPath = `${this.networkPath}/organizations/peerOrganizations/infrastructure.example.com`;
+            const vehiclePath = `${this.networkPath}/organizations/peerOrganizations/vehicleoperator.example.com`;
+            const parkingPath = `${this.networkPath}/organizations/peerOrganizations/parking.example.com`;
             
             const connectionProfile = {
                 name: 'traffic-core-network',
@@ -83,15 +92,77 @@ class FabricClient {
                         certificateAuthorities: ['ca.trafficauthority.example.com']
                     }
                 },
+                channels: {
+                    'city-traffic-global': {
+                        peers: {
+                            'peer0.trafficauthority.example.com': {
+                                endorsingPeer: true,
+                                chaincodeQuery: true,
+                                ledgerQuery: true,
+                                eventSource: true
+                            }
+                        }
+                    },
+                    'emergency-ops': {
+                        peers: {
+                            'peer0.trafficauthority.example.com': {
+                                endorsingPeer: true,
+                                chaincodeQuery: true,
+                                ledgerQuery: true,
+                                eventSource: true
+                            }
+                        }
+                    }
+                },
                 peers: {
                     'peer0.trafficauthority.example.com': {
                         url: 'grpcs://localhost:7051',
                         tlsCACerts: {
-                            pem: fs.readFileSync(`${peerPath}/peers/peer0.${orgName}.example.com/tls/ca.crt`).toString()
+                            pem: fs.readFileSync(`${peerPath}/peers/peer0.trafficauthority.example.com/tls/ca.crt`).toString()
                         },
                         grpcOptions: {
-                            'ssl-target-name-override': `peer0.${orgName}.example.com`,
-                            'hostnameOverride': `peer0.${orgName}.example.com`
+                            'ssl-target-name-override': 'peer0.trafficauthority.example.com',
+                            'hostnameOverride': 'peer0.trafficauthority.example.com'
+                        }
+                    },
+                    'peer0.emergency.example.com': {
+                        url: 'grpcs://localhost:13051',
+                        tlsCACerts: {
+                            pem: fs.readFileSync(`${emergencyPath}/peers/peer0.emergency.example.com/tls/ca.crt`).toString()
+                        },
+                        grpcOptions: {
+                            'ssl-target-name-override': 'peer0.emergency.example.com',
+                            'hostnameOverride': 'peer0.emergency.example.com'
+                        }
+                    },
+                    'peer0.infrastructure.example.com': {
+                        url: 'grpcs://localhost:11051',
+                        tlsCACerts: {
+                            pem: fs.readFileSync(`${infraPath}/peers/peer0.infrastructure.example.com/tls/ca.crt`).toString()
+                        },
+                        grpcOptions: {
+                            'ssl-target-name-override': 'peer0.infrastructure.example.com',
+                            'hostnameOverride': 'peer0.infrastructure.example.com'
+                        }
+                    },
+                    'peer0.vehicleoperator.example.com': {
+                        url: 'grpcs://localhost:9051',
+                        tlsCACerts: {
+                            pem: fs.readFileSync(`${vehiclePath}/peers/peer0.vehicleoperator.example.com/tls/ca.crt`).toString()
+                        },
+                        grpcOptions: {
+                            'ssl-target-name-override': 'peer0.vehicleoperator.example.com',
+                            'hostnameOverride': 'peer0.vehicleoperator.example.com'
+                        }
+                    },
+                    'peer0.parking.example.com': {
+                        url: 'grpcs://localhost:15051',
+                        tlsCACerts: {
+                            pem: fs.readFileSync(`${parkingPath}/peers/peer0.parking.example.com/tls/ca.crt`).toString()
+                        },
+                        grpcOptions: {
+                            'ssl-target-name-override': 'peer0.parking.example.com',
+                            'hostnameOverride': 'peer0.parking.example.com'
                         }
                     }
                 },
@@ -106,18 +177,38 @@ class FabricClient {
                 }
             };
 
+            this.gateway = new Gateway();
             await this.gateway.connect(connectionProfile, {
                 wallet: this.wallet,
                 identity: 'admin',
-                discovery: { enabled: true, asLocalhost: true }
+                discovery: { enabled: false },
+                queryHandlerOptions: {
+                    strategy: DefaultQueryHandlerStrategies.MSPID_SCOPE_SINGLE
+                }
             });
+            
+            console.log('✓ Gateway connected');
+        } catch (error) {
+            console.error('Failed to connect gateway:', error);
+            throw error;
+        }
+    }
 
+    async connectToChannel(channelName) {
+        try {
+            // Return cached network if already connected to this channel
+            if (this.networks[channelName]) {
+                return this.networks[channelName];
+            }
+
+            // Get network from gateway (gateway already connected in initialize())
             const network = await this.gateway.getNetwork(channelName);
+            this.networks[channelName] = network;
             console.log(`✓ Connected to channel: ${channelName}`);
             
             return network;
         } catch (error) {
-            console.error('Failed to connect to channel:', error);
+            console.error(`Failed to get network for channel ${channelName}:`, error);
             throw error;
         }
     }
