@@ -92,25 +92,35 @@ class FabricClient {
                         certificateAuthorities: ['ca.trafficauthority.example.com']
                     }
                 },
+                orderers: {
+                    'orderer0.example.com': {
+                        url: 'grpcs://localhost:7050',
+                        tlsCACerts: {
+                            pem: fs.readFileSync(`${this.networkPath}/organizations/ordererOrganizations/example.com/orderers/orderer0.example.com/tls/ca.crt`).toString()
+                        },
+                        grpcOptions: {
+                            'ssl-target-name-override': 'orderer0.example.com',
+                            'hostnameOverride': 'orderer0.example.com'
+                        }
+                    }
+                },
                 channels: {
                     'city-traffic-global': {
+                        orderers: ['orderer0.example.com'],
                         peers: {
-                            'peer0.trafficauthority.example.com': {
-                                endorsingPeer: true,
-                                chaincodeQuery: true,
-                                ledgerQuery: true,
-                                eventSource: true
-                            }
+                            'peer0.trafficauthority.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
+                            'peer0.emergency.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
+                            'peer0.infrastructure.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
+                            'peer0.vehicleoperator.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
+                            'peer0.parking.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true }
                         }
                     },
                     'emergency-ops': {
+                        orderers: ['orderer0.example.com'],
                         peers: {
-                            'peer0.trafficauthority.example.com': {
-                                endorsingPeer: true,
-                                chaincodeQuery: true,
-                                ledgerQuery: true,
-                                eventSource: true
-                            }
+                            'peer0.trafficauthority.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
+                            'peer0.emergency.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
+                            'peer0.infrastructure.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true }
                         }
                     }
                 },

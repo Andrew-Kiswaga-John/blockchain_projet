@@ -7,7 +7,7 @@ import './App.css';
 const socket = io('http://localhost:3000');
 
 function App() {
-  const [vehicles, setVehicles] = useState([]);
+  const [intersections, setIntersections] = useState([]);
   const [emergencies, setEmergencies] = useState([]);
   const [stats, setStats] = useState({ traffic: {}, emergency: {} });
   const [activeTab, setActiveTab] = useState('map');
@@ -22,9 +22,9 @@ function App() {
 
   // WebSocket listeners
   useEffect(() => {
-    socket.on('vehicle:position', (data) => {
-      setVehicles(prev => {
-        const index = prev.findIndex(v => v.vehicleId === data.vehicleId);
+    socket.on('traffic:update', (data) => {
+      setIntersections(prev => {
+        const index = prev.findIndex(i => i.intersectionId === data.intersectionId);
         if (index >= 0) {
           const updated = [...prev];
           updated[index] = { ...updated[index], ...data };
@@ -39,21 +39,21 @@ function App() {
     });
 
     return () => {
-      socket.off('vehicle:position');
+      socket.off('traffic:update');
       socket.off('emergency:new');
     };
   }, []);
 
   const loadData = async () => {
     try {
-      const [vehiclesRes, emergenciesRes, trafficStatsRes, emergencyStatsRes] = await Promise.all([
-        trafficAPI.getAllVehicles().catch(() => ({ data: { data: [] } })),
+      const [intersectionsRes, emergenciesRes, trafficStatsRes, emergencyStatsRes] = await Promise.all([
+        trafficAPI.getAllIntersections().catch(() => ({ data: { data: [] } })),
         emergencyAPI.getActiveEmergencies().catch(() => ({ data: { data: [] } })),
         trafficAPI.getStatistics().catch(() => ({ data: { data: {} } })),
         emergencyAPI.getStatistics().catch(() => ({ data: { data: {} } }))
       ]);
 
-      if (vehiclesRes.data.success) setVehicles(vehiclesRes.data.data);
+      if (intersectionsRes.data.success) setIntersections(intersectionsRes.data.data);
       if (emergenciesRes.data.success) setEmergencies(emergenciesRes.data.data);
       setStats({
         traffic: trafficStatsRes.data.data || {},
@@ -64,30 +64,23 @@ function App() {
     }
   };
 
-  const handleAddVehicle = async () => {
+  const handleAddIntersection = async () => {
     setLoading(true);
     try {
-      const vehicleId = `VEH-${Date.now()}`;
+      const intersectionId = `INT-${Date.now()}`;
       const lat = 33.5731 + (Math.random() - 0.5) * 0.1;
       const lng = -7.5898 + (Math.random() - 0.5) * 0.1;
       
-      await trafficAPI.registerVehicle({
-        vehicleId,
-        type: 'CAR',
-        owner: 'TrafficAuthorityMSP'
-      });
-
-      await trafficAPI.updateVehiclePosition({
-        vehicleId,
+      await trafficAPI.createIntersection({
+        intersectionId,
+        name: `Intersection ${intersectionId}`,
         latitude: lat,
-        longitude: lng,
-        speed: Math.floor(Math.random() * 60),
-        heading: Math.floor(Math.random() * 360)
+        longitude: lng
       });
 
       await loadData();
     } catch (error) {
-      console.error('Error adding vehicle:', error);
+      console.error('Error adding intersection:', error);
       alert('Error: ' + error.message);
     }
     setLoading(false);
@@ -125,8 +118,8 @@ function App() {
         <h1>🏙️ Smart City Traffic Core</h1>
         <div className="header-stats">
           <div className="stat-badge">
-            <span>🚗 Vehicles</span>
-            <strong>{vehicles.length}</strong>
+            <span>� Intersections</span>
+            <strong>{intersections.length}</strong>
           </div>
           <div className="stat-badge emergency">
             <span>🚨 Emergencies</span>
@@ -161,7 +154,7 @@ function App() {
       <div className="content">
         {activeTab === 'map' && (
           <div className="map-container">
-            <TrafficMap vehicles={vehicles} emergencies={emergencies} />
+            <TrafficMap intersections={intersections} emergencies={emergencies} />
           </div>
         )}
 
@@ -185,9 +178,9 @@ function App() {
             <h2>Simulation Controls</h2>
             
             <div className="control-section">
-              <h3>Vehicles</h3>
-              <button onClick={handleAddVehicle} disabled={loading}>
-                {loading ? 'Adding...' : '➕ Add Random Vehicle'}
+              <h3>Intersections</h3>
+              <button onClick={handleAddIntersection} disabled={loading}>
+                {loading ? 'Adding...' : '➕ Add Random Intersection'}
               </button>
             </div>
 

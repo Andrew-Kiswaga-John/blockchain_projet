@@ -11,8 +11,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom vehicle icon
-const vehicleIcon = new L.Icon({
+// Custom intersection icon
+const intersectionIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDOC4xMyAyIDUgNS4xMyA1IDlDNSAxNC4yNSAxMiAyMiAxMiAyMkMxMiAyMiAxOSAxNC4yNSAxOSA5QzE5IDUuMTMgMTUuODcgMiAxMiAyWiIgZmlsbD0iIzQyODVGNCIvPgo8Y2lyY2xlIGN4PSIxMiIgY3k9IjkiIHI9IjMiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==',
   iconSize: [32, 32],
   iconAnchor: [16, 32],
@@ -27,8 +27,8 @@ const emergencyIcon = new L.Icon({
   popupAnchor: [0, -40]
 });
 
-const TrafficMap = ({ vehicles = [], emergencies = [], onMapClick }) => {
-  const defaultCenter = [33.5731, -7.5898]; // Casablanca, Morocco
+const TrafficMap = ({ intersections = [], emergencies = [], onMapClick }) => {
+  const defaultCenter = [40.7128, -74.0060]; // New York City (matching sample data)
   const defaultZoom = 13;
 
   return (
@@ -43,29 +43,29 @@ const TrafficMap = ({ vehicles = [], emergencies = [], onMapClick }) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 
-        {/* Render Vehicles */}
-        {vehicles.map((vehicle) => (
+        {/* Render Intersections */}
+        {intersections.map((intersection) => (
           <Marker 
-            key={vehicle.vehicleId} 
-            position={[vehicle.location.latitude, vehicle.location.longitude]}
-            icon={vehicleIcon}
+            key={intersection.intersectionId} 
+            position={[intersection.location.latitude, intersection.location.longitude]}
+            icon={intersectionIcon}
           >
             <Popup>
               <div>
                 <h3 style={{ margin: '0 0 8px 0', fontSize: '14px' }}>
-                  🚗 {vehicle.vehicleId}
+                  🚦 {intersection.name}
                 </h3>
                 <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                  <strong>Type:</strong> {vehicle.type}
+                  <strong>ID:</strong> {intersection.intersectionId}
                 </p>
                 <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                  <strong>Owner:</strong> {vehicle.owner}
+                  <strong>Status:</strong> {intersection.trafficLightStatus}
                 </p>
                 <p style={{ margin: '4px 0', fontSize: '12px' }}>
-                  <strong>Speed:</strong> {vehicle.speed || 0} km/h
+                  <strong>Vehicles:</strong> {intersection.vehicleCount || 0}
                 </p>
-                <p style={{ margin: '4px 0', fontSize: '12px', color: '#666' }}>
-                  Last update: {new Date(vehicle.timestamp).toLocaleTimeString()}
+                <p style={{ margin: '4px 0', fontSize: '12px' }}>
+                  <strong>Congestion:</strong> {intersection.congestionLevel}
                 </p>
               </div>
             </Popup>

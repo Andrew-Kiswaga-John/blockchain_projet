@@ -2,8 +2,8 @@ const fabricClient = require('../fabric-sdk/fabricClient');
 
 class TrafficController {
     
-    // Get all vehicles (returns all intersections as we don't have vehicle tracking yet)
-    async getAllVehicles(req, res) {
+    // Get all intersections
+    async getAllIntersections(req, res) {
         try {
             const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
             const result = await contract.evaluateTransaction('queryAllIntersections');
@@ -13,75 +13,77 @@ class TrafficController {
                 data: JSON.parse(result.toString())
             });
         } catch (error) {
-            console.error('Error getting vehicles:', error);
+            console.error('Error getting intersections:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     }
 
-    // Register new vehicle
-    async registerVehicle(req, res) {
+    // Create new intersection
+    async createIntersection(req, res) {
         try {
-            const { vehicleId, type, owner } = req.body;
+            const { intersectionId, name, latitude, longitude } = req.body;
             const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
             
-            await contract.submitTransaction('registerVehicle', vehicleId, type, owner);
-            
-            res.json({
-                success: true,
-                message: `Vehicle ${vehicleId} registered successfully`
-            });
-        } catch (error) {
-            console.error('Error registering vehicle:', error);
-            res.status(500).json({ success: false, error: error.message });
-        }
-    }
-
-    // Update vehicle position
-    async updateVehiclePosition(req, res) {
-        try {
-            const { vehicleId, latitude, longitude, speed, heading } = req.body;
-            const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
-            
-            const timestamp = new Date().toISOString();
             await contract.submitTransaction(
-                'updateVehiclePosition',
-                vehicleId,
-                latitude.toString(),
-                longitude.toString(),
-                speed ? speed.toString() : '0',
-                heading ? heading.toString() : '0',
-                timestamp
+                'createIntersection', 
+                intersectionId, 
+                name, 
+                latitude.toString(), 
+                longitude.toString()
             );
             
             res.json({
                 success: true,
-                message: `Position updated for vehicle ${vehicleId}`
+                message: `Intersection ${intersectionId} created successfully`
             });
         } catch (error) {
-            console.error('Error updating position:', error);
+            console.error('Error creating intersection:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     }
 
-    // Query vehicles by area
-    async queryVehiclesByArea(req, res) {
+    // Record traffic data
+    async recordTrafficData(req, res) {
         try {
-            const { latitude, longitude, radius } = req.query;
+            const { intersectionId, vehicleCount, averageSpeed, congestionLevel } = req.body;
             const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
             
-            const result = await contract.evaluateTransaction(
-                'queryVehiclesByArea',
-                latitude,
-                longitude,
-                radius || '1000'
+            await contract.submitTransaction(
+                'recordTrafficData',
+                intersectionId,
+                vehicleCount.toString(),
+                averageSpeed.toString(),
+                congestionLevel
             );
             
             res.json({
                 success: true,
-                data: JSON.parse(result.toString())
+                message: `Traffic data recorded for ${intersectionId}`
             });
         } catch (error) {
-            console.error('Error querying vehicles by area:', error);
+            console.error('Error recording traffic data:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // Update traffic light status
+    async updateTrafficLight(req, res) {
+        try {
+            const { intersectionId, status } = req.body;
+            const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
+            
+            await contract.submitTransaction(
+                'updateTrafficLightStatus',
+                intersectionId,
+                status
+            );
+            
+            res.json({
+                success: true,
+                message: `Traffic light updated for ${intersectionId}`
+            });
+        } catch (error) {
+            console.error('Error updating traffic light:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     }
@@ -102,51 +104,19 @@ class TrafficController {
         }
     }
 
-    // Update intersection state
-    async updateIntersection(req, res) {
+    // Get intersection history
+    async getIntersectionHistory(req, res) {
         try {
-            const { intersectionId, state, duration } = req.body;
+            const { intersectionId } = req.params;
             const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
-            
-            await contract.submitTransaction(
-                'updateIntersectionState',
-                intersectionId,
-                state,
-                duration ? duration.toString() : '30'
-            );
+            const result = await contract.evaluateTransaction('getIntersectionHistory', intersectionId);
             
             res.json({
                 success: true,
-                message: `Intersection ${intersectionId} updated to ${state}`
+                data: JSON.parse(result.toString())
             });
         } catch (error) {
-            console.error('Error updating intersection:', error);
-            res.status(500).json({ success: false, error: error.message });
-        }
-    }
-
-    // Report congestion
-    async reportCongestion(req, res) {
-        try {
-            const { roadId, level, latitude, longitude } = req.body;
-            const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
-            
-            const timestamp = new Date().toISOString();
-            await contract.submitTransaction(
-                'reportCongestion',
-                roadId,
-                level,
-                latitude.toString(),
-                longitude.toString(),
-                timestamp
-            );
-            
-            res.json({
-                success: true,
-                message: `Congestion reported on ${roadId}`
-            });
-        } catch (error) {
-            console.error('Error reporting congestion:', error);
+            console.error('Error getting intersection history:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     }

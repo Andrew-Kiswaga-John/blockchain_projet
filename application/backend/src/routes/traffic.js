@@ -2,15 +2,14 @@ const express = require('express');
 const router = express.Router();
 const trafficController = require('../controllers/trafficController');
 
-// Vehicle routes
-router.get('/vehicles', trafficController.getAllVehicles);
-router.post('/vehicles/register', trafficController.registerVehicle);
-router.put('/vehicles/position', trafficController.updateVehiclePosition);
-router.get('/vehicles/area', trafficController.queryVehiclesByArea);
+// Intersection routes
+router.get('/intersections', trafficController.getAllIntersections);
+router.post('/intersections', trafficController.createIntersection);
+router.get('/intersections/:intersectionId/history', trafficController.getIntersectionHistory);
 
-// Traffic monitoring
+// Traffic data routes
+router.post('/data', trafficController.recordTrafficData);
+router.put('/light', trafficController.updateTrafficLight);
 router.get('/statistics', trafficController.getTrafficStats);
-router.put('/intersections', trafficController.updateIntersection);
-router.post('/congestion', trafficController.reportCongestion);
 
 module.exports = router;
