@@ -22,13 +22,35 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Request logging middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
+
 // Routes
 app.use('/api/traffic', trafficRoutes);
 app.use('/api/emergency', emergencyRoutes);
 
-// Health check
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Health check with Fabric Status
+app.get('/health', async (req, res) => {
+    let fabricStatus = 'disconnected';
+    try {
+        if (fabricClient.gateway) {
+            fabricStatus = 'connected';
+            // Try simple query
+            // const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
+            // await contract.evaluateTransaction('getTrafficStatistics');
+        }
+    } catch (e) {
+        fabricStatus = 'error: ' + e.message;
+    }
+
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        fabric: fabricStatus
+    });
 });
 
 // WebSocket connection
@@ -59,11 +81,20 @@ io.on('connection', (socket) => {
 async function init() {
     try {
         console.log('🚀 Starting Traffic Core Backend...');
-        await fabricClient.initialize();
-        
+        // await fabricClient.initialize(); // Let's try-catch this explicitly inside
+
+        try {
+            await fabricClient.initialize();
+            console.log('✓ Fabric Client connected successfully.');
+        } catch (err) {
+            console.error('❌ Fabric Client Initialization FAILED:', err.message);
+            console.error('Stack:', err.stack);
+            // Don't exit, let the server run so we can debug via API
+        }
+
         const PORT = process.env.PORT || 3000;
-        server.listen(PORT, () => {
-            console.log(`✓ Server running on port ${PORT}`);
+        server.listen(PORT, '0.0.0.0', () => {
+            console.log(`✓ Server running on port ${PORT} (0.0.0.0)`);
             console.log(`✓ WebSocket server active`);
             console.log(`✓ API: http://localhost:${PORT}/api`);
         });

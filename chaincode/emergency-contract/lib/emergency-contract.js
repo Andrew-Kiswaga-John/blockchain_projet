@@ -21,7 +21,7 @@ class EmergencyContract extends Contract {
      */
     async initLedger(ctx) {
         console.info('============= START : Initialize Emergency Ledger ===========');
-        
+
         const emergencies = [
             {
                 emergencyId: 'EMG001',
@@ -32,6 +32,7 @@ class EmergencyContract extends Contract {
                 vehicleId: 'FIRE-TRUCK-01',
                 routeStatus: 'EN_ROUTE',
                 requestedBy: 'EmergencyServicesMSP',
+                createdAt: '2025-01-01T00:00:00Z',
                 updates: []
             }
         ];
@@ -104,6 +105,7 @@ class EmergencyContract extends Contract {
             routeStatus: 'PENDING',
             estimatedArrival: null,
             requestedBy: organization,
+            createdAt: new Date(ctx.stub.getTxTimestamp().seconds.low * 1000).toISOString(),
             updates: []
         };
 
@@ -267,7 +269,7 @@ class EmergencyContract extends Contract {
 
         // Initialize vehicle tracking
         emergency.vehicleTracking = emergency.vehicleTracking || [];
-        
+
         // Add location update
         emergency.vehicleTracking.push({
             latitude: parseFloat(latitude),
@@ -373,7 +375,7 @@ class EmergencyContract extends Contract {
      */
     async queryEmergency(ctx, emergencyId) {
         const emergencyBytes = await ctx.stub.getState(emergencyId);
-        
+
         if (!emergencyBytes || emergencyBytes.length === 0) {
             throw new Error(`Emergency ${emergencyId} does not exist`);
         }
@@ -397,7 +399,7 @@ class EmergencyContract extends Contract {
 
         const iterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
         const results = await this._getAllResults(iterator);
-        
+
         return JSON.stringify(results);
     }
 
@@ -418,7 +420,7 @@ class EmergencyContract extends Contract {
 
         const iterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
         const results = await this._getAllResults(iterator);
-        
+
         return JSON.stringify(results);
     }
 
@@ -439,7 +441,7 @@ class EmergencyContract extends Contract {
 
         const iterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
         const results = await this._getAllResults(iterator);
-        
+
         return JSON.stringify(results);
     }
 
@@ -487,7 +489,7 @@ class EmergencyContract extends Contract {
 
         for (const emergency of allEmergencies) {
             // Count by status
-            if (emergency.status === 'ACTIVE' || emergency.status === 'ASSIGNED' || 
+            if (emergency.status === 'ACTIVE' || emergency.status === 'ASSIGNED' ||
                 emergency.status === 'EN_ROUTE' || emergency.status === 'ARRIVED') {
                 stats.active++;
             } else if (emergency.status === 'RESOLVED') {
@@ -527,7 +529,7 @@ class EmergencyContract extends Contract {
      */
     async getEmergencyHistory(ctx, emergencyId) {
         const emergencyBytes = await ctx.stub.getState(emergencyId);
-        
+
         if (!emergencyBytes || emergencyBytes.length === 0) {
             throw new Error(`Emergency ${emergencyId} does not exist`);
         }
@@ -542,7 +544,7 @@ class EmergencyContract extends Contract {
     async _getAllResults(iterator) {
         const allResults = [];
         let result = await iterator.next();
-        
+
         while (!result.done) {
             const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
             try {
@@ -553,7 +555,7 @@ class EmergencyContract extends Contract {
             }
             result = await iterator.next();
         }
-        
+
         await iterator.close();
         return allResults;
     }

@@ -18,6 +18,7 @@ docker exec \
   --peerAddresses peer0.emergency.example.com:13051 \
   --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/peerOrganizations/emergency.example.com/peers/peer0.emergency.example.com/tls/ca.crt \
   --waitForEvent \
+  --isInit \
   -c '{"function":"initLedger","Args":[]}'
 echo ""
 echo "Waiting for transaction to be committed..."
