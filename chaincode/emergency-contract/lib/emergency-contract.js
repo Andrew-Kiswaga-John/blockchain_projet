@@ -393,12 +393,17 @@ class EmergencyContract extends Contract {
             selector: {
                 emergencyId: { $exists: true },
                 status: { $in: ['ACTIVE', 'ASSIGNED', 'EN_ROUTE', 'ARRIVED'] }
-            },
-            sort: [{ createdAt: 'desc' }]
+            }
+            // Removed sort from query to avoid index requirement issues
         };
 
         const iterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
         const results = await this._getAllResults(iterator);
+
+        // Sort results in memory
+        results.sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        });
 
         return JSON.stringify(results);
     }
