@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import TrafficMap from './components/TrafficMap';
 import EmergencyControl from './components/EmergencyControl';
-import { getIntersections, getEmergencies, createEmergency, getTrafficStats } from './services/api';
+import IntersectionControl from './components/IntersectionControl';
+import { getIntersections, getEmergencies, createEmergency, createIntersection, getTrafficStats } from './services/api';
 import './App.css';
 
 const socket = io('http://localhost:3000');
@@ -12,6 +13,7 @@ function App() {
   const [emergencies, setEmergencies] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [showEmergencyPanel, setShowEmergencyPanel] = useState(false);
+  const [showIntersectionPanel, setShowIntersectionPanel] = useState(false);
   const [stats, setStats] = useState({});
 
   // Load initial data
@@ -77,10 +79,34 @@ function App() {
     }
   };
 
+  const handleCreateIntersection = async (data) => {
+    try {
+      await createIntersection({
+        ...data,
+        latitude: data.location.latitude,
+        longitude: data.location.longitude
+      });
+      setShowIntersectionPanel(false);
+      setSelectedLocation(null);
+      loadData(); // Refresh immediate
+    } catch (err) {
+      console.error("Failed to create intersection:", err);
+      alert("Failed to create intersection: " + err.message);
+    }
+  };
+
   const toggleEmergencyPanel = () => {
     setShowEmergencyPanel(!showEmergencyPanel);
+    setShowIntersectionPanel(false); // Close other panel
     if (!showEmergencyPanel) {
-      // If opening panel, reset selection
+      setSelectedLocation(null);
+    }
+  };
+
+  const toggleIntersectionPanel = () => {
+    setShowIntersectionPanel(!showIntersectionPanel);
+    setShowEmergencyPanel(false); // Close other panel
+    if (!showIntersectionPanel) {
       setSelectedLocation(null);
     }
   };
@@ -100,13 +126,22 @@ function App() {
             </>
           )}
         </div>
-        <button
-          className="emergency-btn"
-          onClick={toggleEmergencyPanel}
-          style={{ backgroundColor: showEmergencyPanel ? '#b71c1c' : '#d32f2f' }}
-        >
-          {showEmergencyPanel ? 'Cancel Deployment' : '⚠️ DEPLOY EMERGENCY'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            className="emergency-btn"
+            onClick={toggleIntersectionPanel}
+            style={{ backgroundColor: showIntersectionPanel ? '#2e7d32' : '#4caf50' }}
+          >
+            {showIntersectionPanel ? 'Cancel' : '➕ ADD INTERSECTION'}
+          </button>
+          <button
+            className="emergency-btn"
+            onClick={toggleEmergencyPanel}
+            style={{ backgroundColor: showEmergencyPanel ? '#b71c1c' : '#d32f2f' }}
+          >
+            {showEmergencyPanel ? 'Cancel' : '⚠️ DEPLOY EMERGENCY'}
+          </button>
+        </div>
       </header>
 
       <div className="map-wrapper" style={{ height: 'calc(100vh - 60px)', position: 'relative' }}>
@@ -114,13 +149,21 @@ function App() {
           intersections={intersections}
           emergencies={emergencies}
           onLocationSelect={setSelectedLocation}
-          isSelectingLocation={showEmergencyPanel}
+          isSelectingLocation={showEmergencyPanel || showIntersectionPanel}
         />
 
         {showEmergencyPanel && (
           <EmergencyControl
             onDeploy={handleCreateEmergency}
             onClose={() => setShowEmergencyPanel(false)}
+            selectedLocation={selectedLocation}
+          />
+        )}
+
+        {showIntersectionPanel && (
+          <IntersectionControl
+            onCreate={handleCreateIntersection}
+            onClose={() => setShowIntersectionPanel(false)}
             selectedLocation={selectedLocation}
           />
         )}

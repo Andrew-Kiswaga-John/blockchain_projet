@@ -9,6 +9,11 @@ export const getIntersections = async () => {
     return response.data;
 };
 
+export const createIntersection = async (intersectionData) => {
+    const response = await api.post('/traffic/intersections', intersectionData);
+    return response.data;
+};
+
 export const getEmergencies = async () => {
     const response = await api.get('/emergency/active');
     return response.data;
