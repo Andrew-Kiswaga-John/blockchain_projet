@@ -5,11 +5,19 @@ const fs = require('fs');
 
 class FabricClient {
     constructor() {
-        this.gateway = null;
+        this.gateways = {}; // Map<orgName, Gateway>
         this.wallet = null;
-        this.networks = {};
+        this.networks = {}; // Map<channelName, Network> (Default org)
         // Use absolute path for WSL environment
         this.networkPath = process.env.NETWORK_PATH || path.resolve(__dirname, '../../../../network');
+
+        this.orgConfig = {
+            'TrafficAuthority': { msp: 'TrafficAuthorityMSP', peer: 'peer0.trafficauthority.example.com', ca: 'trafficauthority' },
+            'EmergencyServices': { msp: 'EmergencyServicesMSP', peer: 'peer0.emergency.example.com', ca: 'emergency' },
+            'InfrastructureOperator': { msp: 'InfrastructureOperatorMSP', peer: 'peer0.infrastructure.example.com', ca: 'infrastructure' },
+            'VehicleOperator': { msp: 'VehicleOperatorMSP', peer: 'peer0.vehicleoperator.example.com', ca: 'vehicleoperator' },
+            'ParkingManagement': { msp: 'ParkingManagementMSP', peer: 'peer0.parking.example.com', ca: 'parking' }
+        };
     }
 
     async initialize() {
@@ -18,221 +26,121 @@ class FabricClient {
             const walletPath = path.join(__dirname, '../../wallet');
             this.wallet = await Wallets.newFileSystemWallet(walletPath);
 
-            // Check if admin identity exists
-            const adminExists = await this.wallet.get('admin');
-            if (!adminExists) {
-                await this.enrollAdmin();
+            // Enroll Admins for all organizations
+            for (const [orgName, config] of Object.entries(this.orgConfig)) {
+                const identityLabel = `admin-${config.ca}`;
+                const exists = await this.wallet.get(identityLabel);
+                if (!exists) {
+                    await this.enrollAdmin(orgName, config.ca, config.msp);
+                }
             }
 
-            // Connect gateway once
-            await this.connectGateway();
+            // Connect default gateway (TrafficAuthority)
+            await this.connectGateway('TrafficAuthority');
 
-            console.log('✓ Fabric client initialized');
+            console.log('✓ Fabric client initialized with multi-org support');
         } catch (error) {
             console.error('Failed to initialize Fabric client:', error);
             throw error;
         }
     }
 
-    async enrollAdmin() {
+    async enrollAdmin(orgName, listName, mspId) {
         try {
-            const orgName = 'trafficauthority';
-            const mspPath = `${this.networkPath}/organizations/peerOrganizations/${orgName}.example.com/users/Admin@${orgName}.example.com/msp`;
-            const adminCertPath = `${mspPath}/signcerts/Admin@${orgName}.example.com-cert.pem`;
+            const orgLower = listName; // e.g. trafficauthority
+            const mspPath = `${this.networkPath}/organizations/peerOrganizations/${orgLower}.example.com/users/Admin@${orgLower}.example.com/msp`;
+            const adminCertPath = `${mspPath}/signcerts/Admin@${orgLower}.example.com-cert.pem`;
             const adminKeyDir = `${mspPath}/keystore`;
-            const caCertPath = `${mspPath}/cacerts/ca.${orgName}.example.com-cert.pem`;
-            
+
+            if (!fs.existsSync(adminCertPath)) {
+                console.warn(`Skipping enrollment for ${orgName}: Crypto materials not found at ${adminCertPath}`);
+                return;
+            }
+
             const certificate = fs.readFileSync(adminCertPath).toString();
             const keyFiles = fs.readdirSync(adminKeyDir);
             const privateKey = fs.readFileSync(path.join(adminKeyDir, keyFiles[0])).toString();
-            const caCert = fs.readFileSync(caCertPath).toString();
 
             const x509Identity = {
                 credentials: {
                     certificate,
                     privateKey,
                 },
-                mspId: 'TrafficAuthorityMSP',
+                mspId: mspId,
                 type: 'X.509',
             };
 
-            await this.wallet.put('admin', x509Identity);
-            console.log('✓ Admin identity loaded successfully');
+            await this.wallet.put(`admin-${orgLower}`, x509Identity);
+            console.log(`✓ Admin identity loaded for ${orgName}`);
         } catch (error) {
-            console.error('Failed to enroll admin:', error);
-            throw error;
+            console.error(`Failed to enroll admin for ${orgName}:`, error);
         }
     }
 
-    async connectGateway() {
-        try {
-            const orgName = 'trafficauthority';
-            const peerPath = `${this.networkPath}/organizations/peerOrganizations/${orgName}.example.com`;
-            const emergencyPath = `${this.networkPath}/organizations/peerOrganizations/emergency.example.com`;
-            const infraPath = `${this.networkPath}/organizations/peerOrganizations/infrastructure.example.com`;
-            const vehiclePath = `${this.networkPath}/organizations/peerOrganizations/vehicleoperator.example.com`;
-            const parkingPath = `${this.networkPath}/organizations/peerOrganizations/parking.example.com`;
-            
-            const connectionProfile = {
-                name: 'traffic-core-network',
-                version: '1.0.0',
-                client: {
-                    organization: 'TrafficAuthority',
-                    connection: {
-                        timeout: {
-                            peer: { endorser: '300' },
-                            orderer: '300'
-                        }
-                    }
-                },
-                organizations: {
-                    TrafficAuthority: {
-                        mspid: 'TrafficAuthorityMSP',
-                        peers: ['peer0.trafficauthority.example.com'],
-                        certificateAuthorities: ['ca.trafficauthority.example.com']
-                    }
-                },
-                orderers: {
-                    'orderer0.example.com': {
-                        url: 'grpcs://localhost:7050',
-                        tlsCACerts: {
-                            pem: fs.readFileSync(`${this.networkPath}/organizations/ordererOrganizations/example.com/orderers/orderer0.example.com/tls/ca.crt`).toString()
-                        },
-                        grpcOptions: {
-                            'ssl-target-name-override': 'orderer0.example.com',
-                            'hostnameOverride': 'orderer0.example.com'
-                        }
-                    }
-                },
-                channels: {
-                    'city-traffic-global': {
-                        orderers: ['orderer0.example.com'],
-                        peers: {
-                            'peer0.trafficauthority.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
-                            'peer0.emergency.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
-                            'peer0.infrastructure.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
-                            'peer0.vehicleoperator.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
-                            'peer0.parking.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true }
-                        }
-                    },
-                    'emergency-ops': {
-                        orderers: ['orderer0.example.com'],
-                        peers: {
-                            'peer0.trafficauthority.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
-                            'peer0.emergency.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true },
-                            'peer0.infrastructure.example.com': { endorsingPeer: true, chaincodeQuery: true, ledgerQuery: true, eventSource: true }
-                        }
-                    }
-                },
-                peers: {
-                    'peer0.trafficauthority.example.com': {
-                        url: 'grpcs://localhost:7051',
-                        tlsCACerts: {
-                            pem: fs.readFileSync(`${peerPath}/peers/peer0.trafficauthority.example.com/tls/ca.crt`).toString()
-                        },
-                        grpcOptions: {
-                            'ssl-target-name-override': 'peer0.trafficauthority.example.com',
-                            'hostnameOverride': 'peer0.trafficauthority.example.com'
-                        }
-                    },
-                    'peer0.emergency.example.com': {
-                        url: 'grpcs://localhost:13051',
-                        tlsCACerts: {
-                            pem: fs.readFileSync(`${emergencyPath}/peers/peer0.emergency.example.com/tls/ca.crt`).toString()
-                        },
-                        grpcOptions: {
-                            'ssl-target-name-override': 'peer0.emergency.example.com',
-                            'hostnameOverride': 'peer0.emergency.example.com'
-                        }
-                    },
-                    'peer0.infrastructure.example.com': {
-                        url: 'grpcs://localhost:11051',
-                        tlsCACerts: {
-                            pem: fs.readFileSync(`${infraPath}/peers/peer0.infrastructure.example.com/tls/ca.crt`).toString()
-                        },
-                        grpcOptions: {
-                            'ssl-target-name-override': 'peer0.infrastructure.example.com',
-                            'hostnameOverride': 'peer0.infrastructure.example.com'
-                        }
-                    },
-                    'peer0.vehicleoperator.example.com': {
-                        url: 'grpcs://localhost:9051',
-                        tlsCACerts: {
-                            pem: fs.readFileSync(`${vehiclePath}/peers/peer0.vehicleoperator.example.com/tls/ca.crt`).toString()
-                        },
-                        grpcOptions: {
-                            'ssl-target-name-override': 'peer0.vehicleoperator.example.com',
-                            'hostnameOverride': 'peer0.vehicleoperator.example.com'
-                        }
-                    },
-                    'peer0.parking.example.com': {
-                        url: 'grpcs://localhost:15051',
-                        tlsCACerts: {
-                            pem: fs.readFileSync(`${parkingPath}/peers/peer0.parking.example.com/tls/ca.crt`).toString()
-                        },
-                        grpcOptions: {
-                            'ssl-target-name-override': 'peer0.parking.example.com',
-                            'hostnameOverride': 'peer0.parking.example.com'
-                        }
-                    }
-                },
-                certificateAuthorities: {
-                    'ca.trafficauthority.example.com': {
-                        url: 'https://localhost:7054',
-                        caName: `ca.${orgName}.example.com`,
-                        tlsCACerts: {
-                            pem: fs.readFileSync(`${peerPath}/ca/ca.${orgName}.example.com-cert.pem`).toString()
-                        }
-                    }
-                }
-            };
+    async connectGateway(orgName) {
+        if (this.gateways[orgName]) {
+            return this.gateways[orgName];
+        }
 
-            this.gateway = new Gateway();
-            await this.gateway.connect(connectionProfile, {
+        try {
+            const config = this.orgConfig[orgName];
+            if (!config) throw new Error(`Unknown Organization: ${orgName}`);
+
+            const identityLabel = `admin-${config.ca}`;
+            const exists = await this.wallet.get(identityLabel);
+
+            if (!exists) {
+                console.warn(`Cannot connect as ${orgName}: Identity ${identityLabel} not in wallet.`);
+                return null;
+            }
+
+            const connectionProfile = this.createConnectionProfile(orgName);
+            const gateway = new Gateway();
+
+            await gateway.connect(connectionProfile, {
                 wallet: this.wallet,
-                identity: 'admin',
+                identity: identityLabel,
                 discovery: { enabled: false },
                 queryHandlerOptions: {
                     strategy: DefaultQueryHandlerStrategies.MSPID_SCOPE_SINGLE
                 }
             });
-            
-            console.log('✓ Gateway connected');
+
+            this.gateways[orgName] = gateway;
+            console.log(`✓ Gateway connected for ${orgName}`);
+            return gateway;
         } catch (error) {
-            console.error('Failed to connect gateway:', error);
+            console.error(`Failed to connect gateway for ${orgName}:`, error);
             throw error;
         }
     }
 
-    async connectToChannel(channelName) {
-        try {
-            // Return cached network if already connected to this channel
-            if (this.networks[channelName]) {
-                return this.networks[channelName];
-            }
+    createConnectionProfile(orgName) {
+        // Load the common connection profile or build it dynamically
+        // For simplicity, we assume we can read the org-specific profile from the network folder implies
+        const orgLower = this.orgConfig[orgName].ca;
+        const profilePath = path.join(this.networkPath, 'organizations', 'peerOrganizations', `${orgLower}.example.com`, `connection-${orgLower}.json`);
 
-            // Get network from gateway (gateway already connected in initialize())
-            const network = await this.gateway.getNetwork(channelName);
-            this.networks[channelName] = network;
-            console.log(`✓ Connected to channel: ${channelName}`);
-            
-            return network;
-        } catch (error) {
-            console.error(`Failed to get network for channel ${channelName}:`, error);
-            throw error;
+        if (fs.existsSync(profilePath)) {
+            const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+            return profile;
         }
+
+        throw new Error(`Connection profile not found for ${orgName} at ${profilePath}`);
     }
 
-    async getContract(channelName, contractName) {
-        const network = await this.connectToChannel(channelName);
+    async getContract(channelName, contractName, orgName = 'TrafficAuthority') {
+        const gateway = await this.connectGateway(orgName);
+        const network = await gateway.getNetwork(channelName);
         return network.getContract(contractName);
     }
 
     async disconnect() {
-        if (this.gateway) {
-            this.gateway.disconnect();
-            console.log('✓ Disconnected from gateway');
+        for (const [org, gateway] of Object.entries(this.gateways)) {
+            gateway.disconnect();
+            console.log(`✓ Disconnected gateway for ${org}`);
         }
+        this.gateways = {};
     }
 }
 

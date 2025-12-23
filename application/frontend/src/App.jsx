@@ -3,6 +3,7 @@ import io from 'socket.io-client';
 import TrafficMap from './components/TrafficMap';
 import EmergencyControl from './components/EmergencyControl';
 import IntersectionControl from './components/IntersectionControl';
+import ConsensusLab from './components/ConsensusLab';
 import { getIntersections, getEmergencies, createEmergency, createIntersection, getTrafficStats } from './services/api';
 import './App.css';
 
@@ -14,6 +15,7 @@ function App() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [showEmergencyPanel, setShowEmergencyPanel] = useState(false);
   const [showIntersectionPanel, setShowIntersectionPanel] = useState(false);
+  const [showConsensusLab, setShowConsensusLab] = useState(false);
   const [stats, setStats] = useState({});
 
   // Load initial data
@@ -103,9 +105,16 @@ function App() {
     }
   };
 
+  const toggleConsensusLab = () => {
+    setShowConsensusLab(!showConsensusLab);
+    setShowEmergencyPanel(false);
+    setShowIntersectionPanel(false);
+  };
+
   const toggleIntersectionPanel = () => {
     setShowIntersectionPanel(!showIntersectionPanel);
     setShowEmergencyPanel(false); // Close other panel
+    setShowConsensusLab(false);
     if (!showIntersectionPanel) {
       setSelectedLocation(null);
     }
@@ -141,6 +150,13 @@ function App() {
           >
             {showEmergencyPanel ? 'Cancel' : '⚠️ DEPLOY EMERGENCY'}
           </button>
+          <button
+            className="emergency-btn"
+            onClick={toggleConsensusLab}
+            style={{ backgroundColor: showConsensusLab ? '#1565c0' : '#2196f3' }}
+          >
+            {showConsensusLab ? 'Close Lab' : '🧬 CONSENSUS LAB'}
+          </button>
         </div>
       </header>
 
@@ -165,6 +181,12 @@ function App() {
             onCreate={handleCreateIntersection}
             onClose={() => setShowIntersectionPanel(false)}
             selectedLocation={selectedLocation}
+          />
+        )}
+
+        {showConsensusLab && (
+          <ConsensusLab
+            onClose={() => setShowConsensusLab(false)}
           />
         )}
       </div>

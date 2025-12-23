@@ -28,3 +28,10 @@ export const getTrafficStats = async () => {
     const response = await api.get('/traffic/statistics');
     return response.data;
 };
+
+export const runConsensusTest = async (type, payload) => {
+    // type: 'raft', 'poa', 'pbft'
+    const response = await api.post(`/consensus/${type}`, payload);
+    return response.data;
+};
+

@@ -31,6 +31,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/traffic', trafficRoutes);
 app.use('/api/emergency', emergencyRoutes);
+app.use('/api/consensus', require('./routes/consensus'));
 
 // Health check with Fabric Status
 app.get('/health', async (req, res) => {

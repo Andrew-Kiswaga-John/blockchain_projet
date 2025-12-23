@@ -7,7 +7,12 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
   },
-  "keywords": ["blockchain", "hyperledger-fabric", "smart-city", "traffic"],
+  "keywords": [
+    "blockchain",
+    "hyperledger-fabric",
+    "smart-city",
+    "traffic"
+  ],
   "author": "IASD Master 2025",
   "license": "MIT",
   "dependencies": {
@@ -17,7 +22,8 @@
     "fabric-network": "^2.2.18",
     "fabric-ca-client": "^2.2.18",
     "socket.io": "^4.6.1",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
