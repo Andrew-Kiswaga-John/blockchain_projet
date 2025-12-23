@@ -5,6 +5,7 @@ const consensusController = require('../controllers/consensusController');
 router.post('/raft', consensusController.runRaftTest);
 router.post('/poa', consensusController.runPoATest);
 router.post('/pbft', consensusController.runPBFTTest);
+router.post('/export-report', consensusController.exportReport);
 // router.post('/liveness', consensusController.runLivenessTest);
 
 module.exports = router;

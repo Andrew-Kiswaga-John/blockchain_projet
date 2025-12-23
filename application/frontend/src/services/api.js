@@ -35,3 +35,8 @@ export const runConsensusTest = async (type, payload) => {
     return response.data;
 };
 
+export const exportConsensusReport = async (results) => {
+    const response = await api.post('/consensus/export-report', { results });
+    return response.data;
+};
+
