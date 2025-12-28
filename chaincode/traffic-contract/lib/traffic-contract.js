@@ -25,7 +25,7 @@ class TrafficContract extends Contract {
      */
     async initLedger(ctx) {
         console.info('============= START : Initialize Traffic Ledger ===========');
-        
+
         // Use transaction timestamp for deterministic initialization
         const intersections = [
             {
@@ -77,8 +77,19 @@ class TrafficContract extends Contract {
         console.info('============= START : Record Traffic Data ===========');
 
         // Validate inputs
-        if (!intersectionId || !vehicleCount || !averageSpeed || !congestionLevel) {
+        if (!intersectionId || vehicleCount === undefined || averageSpeed === undefined || !congestionLevel) {
             throw new Error('Missing required parameters');
+        }
+
+        const vCount = parseInt(vehicleCount);
+        const aSpeed = parseFloat(averageSpeed);
+
+        // [SEC: SANITY CHECK] Lying Sensor Attack Mitigation
+        if (vCount < 0 || vCount > 500) {
+            throw new Error(`VALIDATION_FAILED: vehicleCount (${vCount}) is physically impossible (Range: 0-500)`);
+        }
+        if (aSpeed < 0 || aSpeed > 250) {
+            throw new Error(`VALIDATION_FAILED: averageSpeed (${aSpeed}) is physically impossible (Range: 0-250)`);
         }
 
         // Validate congestion level
@@ -111,7 +122,7 @@ class TrafficContract extends Contract {
         } else {
             // Update existing intersection
             intersection = JSON.parse(intersectionBytes.toString());
-            
+
             // Save current state to history
             intersection.history = intersection.history || [];
             intersection.history.push({
@@ -161,6 +172,13 @@ class TrafficContract extends Contract {
         const validStatuses = ['RED', 'YELLOW', 'GREEN', 'FLASHING', 'OFF'];
         if (!validStatuses.includes(status.toUpperCase())) {
             throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+        }
+
+        // [SEC: AUTHORIZATION CHECK] Imposter Attack Mitigation
+        const mspId = ctx.clientIdentity.getMSPID();
+        const authorizedOrgs = ['TrafficAuthorityMSP', 'EmergencyServicesMSP'];
+        if (!authorizedOrgs.includes(mspId)) {
+            throw new Error(`SECURITY_DENIED: Organization ${mspId} is not authorized to update traffic lights.`);
         }
 
         // Check if intersection exists
@@ -243,7 +261,7 @@ class TrafficContract extends Contract {
      */
     async queryIntersection(ctx, intersectionId) {
         const intersectionBytes = await ctx.stub.getState(intersectionId);
-        
+
         if (!intersectionBytes || intersectionBytes.length === 0) {
             throw new Error(`Intersection ${intersectionId} does not exist`);
         }
@@ -299,7 +317,7 @@ class TrafficContract extends Contract {
 
         const iterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
         const results = await this._getAllResults(iterator);
-        
+
         return JSON.stringify(results);
     }
 
@@ -311,7 +329,7 @@ class TrafficContract extends Contract {
      */
     async getIntersectionHistory(ctx, intersectionId) {
         const intersectionBytes = await ctx.stub.getState(intersectionId);
-        
+
         if (!intersectionBytes || intersectionBytes.length === 0) {
             throw new Error(`Intersection ${intersectionId} does not exist`);
         }
@@ -349,14 +367,14 @@ class TrafficContract extends Contract {
         for (const intersection of allIntersections) {
             stats.totalVehicles += intersection.vehicleCount || 0;
             speedSum += intersection.averageSpeed || 0;
-            
+
             if (intersection.congestionLevel) {
-                stats.congestionBreakdown[intersection.congestionLevel] = 
+                stats.congestionBreakdown[intersection.congestionLevel] =
                     (stats.congestionBreakdown[intersection.congestionLevel] || 0) + 1;
             }
-            
+
             if (intersection.trafficLightStatus) {
-                stats.trafficLightStatus[intersection.trafficLightStatus] = 
+                stats.trafficLightStatus[intersection.trafficLightStatus] =
                     (stats.trafficLightStatus[intersection.trafficLightStatus] || 0) + 1;
             }
         }
@@ -372,7 +390,7 @@ class TrafficContract extends Contract {
     async _getAllResults(iterator) {
         const allResults = [];
         let result = await iterator.next();
-        
+
         while (!result.done) {
             const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
             let record;
@@ -384,7 +402,7 @@ class TrafficContract extends Contract {
             }
             result = await iterator.next();
         }
-        
+
         await iterator.close();
         return allResults;
     }

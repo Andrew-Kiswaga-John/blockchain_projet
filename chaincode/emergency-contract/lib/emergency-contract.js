@@ -87,8 +87,11 @@ class EmergencyContract extends Contract {
             throw new Error(`Emergency ${emergencyId} already exists`);
         }
 
-        // Get caller identity
+        // [SEC: AUTHORIZATION CHECK] Imposter Attack Mitigation
         const organization = ctx.clientIdentity.getMSPID();
+        if (organization !== 'EmergencyServicesMSP') {
+            throw new Error(`SECURITY_DENIED: Organization ${organization} is not authorized to create emergency alerts.`);
+        }
 
         const emergency = {
             emergencyId,
@@ -192,6 +195,12 @@ class EmergencyContract extends Contract {
 
         if (!emergencyId || !routeData) {
             throw new Error('Missing required parameters');
+        }
+
+        // [SEC: AUTHORIZATION CHECK] Imposter Attack Mitigation
+        const mspId = ctx.clientIdentity.getMSPID();
+        if (mspId !== 'EmergencyServicesMSP') {
+            throw new Error(`SECURITY_DENIED: Organization ${mspId} is not authorized to request priority routing.`);
         }
 
         // Get emergency
