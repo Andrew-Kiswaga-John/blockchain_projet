@@ -1,0 +1,16 @@
+{
+    "name": "attack-simulator",
+    "version": "1.0.0",
+    "description": "Simulation scripts for Smart City security attacks",
+    "main": "index.js",
+    "scripts": {
+        "attack:lying": "node lyingSensor.js",
+        "attack:imposter": "node imposterHack.js",
+        "attack:conflict": "node conflict.js",
+        "attack:traitor": "node traitor.js"
+    },
+    "dependencies": {
+        "axios": "^1.6.2",
+        "chalk": "^4.1.2"
+    }
+}

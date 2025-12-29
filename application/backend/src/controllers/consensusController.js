@@ -101,11 +101,15 @@ exports.runPBFTTest = async (req, res) => {
         totalTxCount++;
         console.log(`[TEST: PBFT] Vote 2 Submitted (Emergency)`);
 
-        // Vote 3: Infrastructure Operator
-        const contractInfra = await fabricClient.getContract('city-traffic-global', 'consensus-contract', 'InfrastructureOperator');
-        await contractInfra.submitTransaction('votePBFT', proposalId);
-        totalTxCount++;
-        console.log(`[TEST: PBFT] Vote 3 Submitted (Infrastructure)`);
+        // Vote 3: Infrastructure Operator (Skip if it's the traitor)
+        if (req.body.simulateTraitor && req.body.maliciousOrg === 'InfrastructureOperator') {
+            console.log(chalk?.red ? chalk.red(`[TEST: PBFT] !!! BYZANTINE ALERT: InfrastructureOperator is sabotaging the vote !!!`) : `[TEST: PBFT] !!! BYZANTINE ALERT: InfrastructureOperator is sabotaging the vote !!!`);
+        } else {
+            const contractInfra = await fabricClient.getContract('city-traffic-global', 'consensus-contract', 'InfrastructureOperator');
+            await contractInfra.submitTransaction('votePBFT', proposalId);
+            totalTxCount++;
+            console.log(`[TEST: PBFT] Vote 3 Submitted (Infrastructure)`);
+        }
 
         // Note: At this point, 3/4 votes are in. Consensus should be FINALIZED within the smart contract.
 

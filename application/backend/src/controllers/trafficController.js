@@ -1,13 +1,13 @@
 const fabricClient = require('../fabric-sdk/fabricClient');
 
 class TrafficController {
-    
+
     // Get all intersections
     async getAllIntersections(req, res) {
         try {
             const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
             const result = await contract.evaluateTransaction('queryAllIntersections');
-            
+
             res.json({
                 success: true,
                 data: JSON.parse(result.toString())
@@ -23,15 +23,15 @@ class TrafficController {
         try {
             const { intersectionId, name, latitude, longitude } = req.body;
             const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
-            
+
             await contract.submitTransaction(
-                'createIntersection', 
-                intersectionId, 
-                name, 
-                latitude.toString(), 
+                'createIntersection',
+                intersectionId,
+                name,
+                latitude.toString(),
                 longitude.toString()
             );
-            
+
             res.json({
                 success: true,
                 message: `Intersection ${intersectionId} created successfully`
@@ -46,8 +46,9 @@ class TrafficController {
     async recordTrafficData(req, res) {
         try {
             const { intersectionId, vehicleCount, averageSpeed, congestionLevel } = req.body;
-            const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
-            
+            const orgName = req.header('x-org-name') || 'TrafficAuthority';
+            const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract', orgName);
+
             await contract.submitTransaction(
                 'recordTrafficData',
                 intersectionId,
@@ -55,7 +56,7 @@ class TrafficController {
                 averageSpeed.toString(),
                 congestionLevel
             );
-            
+
             res.json({
                 success: true,
                 message: `Traffic data recorded for ${intersectionId}`
@@ -70,14 +71,15 @@ class TrafficController {
     async updateTrafficLight(req, res) {
         try {
             const { intersectionId, status } = req.body;
-            const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
-            
+            const orgName = req.header('x-org-name') || 'TrafficAuthority';
+            const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract', orgName);
+
             await contract.submitTransaction(
                 'updateTrafficLightStatus',
                 intersectionId,
                 status
             );
-            
+
             res.json({
                 success: true,
                 message: `Traffic light updated for ${intersectionId}`
@@ -93,7 +95,7 @@ class TrafficController {
         try {
             const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
             const result = await contract.evaluateTransaction('getTrafficStatistics');
-            
+
             res.json({
                 success: true,
                 data: JSON.parse(result.toString())
@@ -110,7 +112,7 @@ class TrafficController {
             const { intersectionId } = req.params;
             const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
             const result = await contract.evaluateTransaction('getIntersectionHistory', intersectionId);
-            
+
             res.json({
                 success: true,
                 data: JSON.parse(result.toString())

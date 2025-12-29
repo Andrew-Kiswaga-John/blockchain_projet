@@ -1,13 +1,13 @@
 const fabricClient = require('../fabric-sdk/fabricClient');
 
 class EmergencyController {
-    
+
     // Get emergency statistics
     async getStatistics(req, res) {
         try {
             const contract = await fabricClient.getContract('emergency-ops', 'emergency-contract');
             const result = await contract.evaluateTransaction('getEmergencyStatistics');
-            
+
             res.json({
                 success: true,
                 data: JSON.parse(result.toString())
@@ -22,8 +22,9 @@ class EmergencyController {
     async createEmergency(req, res) {
         try {
             const { emergencyId, type, severity, latitude, longitude, address, description } = req.body;
-            const contract = await fabricClient.getContract('emergency-ops', 'emergency-contract');
-            
+            const orgName = req.header('x-org-name') || 'EmergencyServices';
+            const contract = await fabricClient.getContract('emergency-ops', 'emergency-contract', orgName);
+
             await contract.submitTransaction(
                 'createEmergency',
                 emergencyId,
@@ -34,7 +35,7 @@ class EmergencyController {
                 address || 'Unknown',
                 description || ''
             );
-            
+
             res.json({
                 success: true,
                 message: `Emergency ${emergencyId} created successfully`,
@@ -51,7 +52,7 @@ class EmergencyController {
         try {
             const contract = await fabricClient.getContract('emergency-ops', 'emergency-contract');
             const result = await contract.evaluateTransaction('queryActiveEmergencies');
-            
+
             res.json({
                 success: true,
                 data: JSON.parse(result.toString())
@@ -68,7 +69,7 @@ class EmergencyController {
             const { emergencyId } = req.params;
             const contract = await fabricClient.getContract('emergency-ops', 'emergency-contract');
             const result = await contract.evaluateTransaction('queryEmergency', emergencyId);
-            
+
             res.json({
                 success: true,
                 data: JSON.parse(result.toString())
@@ -84,14 +85,14 @@ class EmergencyController {
         try {
             const { emergencyId, status, vehicleId } = req.body;
             const contract = await fabricClient.getContract('emergency-ops', 'emergency-contract');
-            
+
             await contract.submitTransaction(
                 'updateEmergencyStatus',
                 emergencyId,
                 status,
                 vehicleId || ''
             );
-            
+
             res.json({
                 success: true,
                 message: `Emergency ${emergencyId} updated to ${status}`
@@ -107,14 +108,14 @@ class EmergencyController {
         try {
             const { emergencyId, vehicleId, estimatedArrival } = req.body;
             const contract = await fabricClient.getContract('emergency-ops', 'emergency-contract');
-            
+
             await contract.submitTransaction(
                 'assignVehicle',
                 emergencyId,
                 vehicleId,
                 estimatedArrival || ''
             );
-            
+
             res.json({
                 success: true,
                 message: `Vehicle ${vehicleId} assigned to emergency ${emergencyId}`
