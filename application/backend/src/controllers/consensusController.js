@@ -103,7 +103,7 @@ exports.runPBFTTest = async (req, res) => {
 
         // Vote 3: Infrastructure Operator (Skip if it's the traitor)
         if (req.body.simulateTraitor && req.body.maliciousOrg === 'InfrastructureOperator') {
-            console.log(chalk?.red ? chalk.red(`[TEST: PBFT] !!! BYZANTINE ALERT: InfrastructureOperator is sabotaging the vote !!!`) : `[TEST: PBFT] !!! BYZANTINE ALERT: InfrastructureOperator is sabotaging the vote !!!`);
+            console.log(`[TEST: PBFT] !!! BYZANTINE ALERT: InfrastructureOperator is sabotaging the vote !!!`);
         } else {
             const contractInfra = await fabricClient.getContract('city-traffic-global', 'consensus-contract', 'InfrastructureOperator');
             await contractInfra.submitTransaction('votePBFT', proposalId);
