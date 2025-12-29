@@ -1,4 +1,5 @@
 const fabricClient = require('../fabric-sdk/fabricClient');
+const socService = require('../services/socService');
 
 class TrafficController {
 
@@ -63,6 +64,14 @@ class TrafficController {
             });
         } catch (error) {
             console.error('Error recording traffic data:', error);
+
+            // Phase 2: Report to SOC
+            socService.handleBlockchainError(error, {
+                action: 'recordTrafficData',
+                orgName: req.header('x-org-name') || 'TrafficAuthority',
+                data: req.body
+            });
+
             res.status(500).json({ success: false, error: error.message });
         }
     }
@@ -86,6 +95,14 @@ class TrafficController {
             });
         } catch (error) {
             console.error('Error updating traffic light:', error);
+
+            // Phase 2: Report to SOC
+            socService.handleBlockchainError(error, {
+                action: 'updateTrafficLightStatus',
+                orgName: req.header('x-org-name') || 'TrafficAuthority',
+                data: req.body
+            });
+
             res.status(500).json({ success: false, error: error.message });
         }
     }

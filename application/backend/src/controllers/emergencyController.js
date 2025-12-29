@@ -1,4 +1,5 @@
 const fabricClient = require('../fabric-sdk/fabricClient');
+const socService = require('../services/socService');
 
 class EmergencyController {
 
@@ -43,6 +44,14 @@ class EmergencyController {
             });
         } catch (error) {
             console.error('Error creating emergency:', error);
+
+            // Phase 2: Report to SOC
+            socService.handleBlockchainError(error, {
+                action: 'createEmergency',
+                orgName: req.header('x-org-name') || 'EmergencyServices',
+                data: req.body
+            });
+
             res.status(500).json({ success: false, error: error.message });
         }
     }

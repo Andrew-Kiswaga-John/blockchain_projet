@@ -2,6 +2,7 @@ const fabricClient = require('../fabric-sdk/fabricClient');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
+const socService = require('../services/socService');
 
 exports.runRaftTest = async (req, res) => {
     try {
@@ -104,6 +105,15 @@ exports.runPBFTTest = async (req, res) => {
         // Vote 3: Infrastructure Operator (Skip if it's the traitor)
         if (req.body.simulateTraitor && req.body.maliciousOrg === 'InfrastructureOperator') {
             console.log(`[TEST: PBFT] !!! BYZANTINE ALERT: InfrastructureOperator is sabotaging the vote !!!`);
+
+            // Phase 2: Report Byzantine Alert to SOC
+            socService.reportIncident({
+                type: 'BYZANTINE_FAULT_DETECTED',
+                severity: 'CRITICAL',
+                message: 'InfrastructureOperator refused to vote (Byzantine behavior)',
+                attacker: 'InfrastructureOperator',
+                action: 'PBFT Vote Sabotage'
+            });
         } else {
             const contractInfra = await fabricClient.getContract('city-traffic-global', 'consensus-contract', 'InfrastructureOperator');
             await contractInfra.submitTransaction('votePBFT', proposalId);
