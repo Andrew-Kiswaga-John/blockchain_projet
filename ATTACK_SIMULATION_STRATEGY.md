@@ -1,77 +1,72 @@
-# 🚨 Smart City Traffic Core: Attack Simulation Strategy
+# 🛡️ Integrated Attack Simulation & Cognitive SOC Strategy
 
-## 📝 Introduction
-A major requirement for our "Traffic Core" project is to prove that the blockchain isn't just a database, but a **security system**. We need to show what happens when someone tries to "cheat" or "hack" the city's traffic network.
+## 📖 Introduction
+This document explains how our **Blockchain Network** works together with our **Mini-SOC (Security Operations Center)** to protect the Smart City. 
 
-Since we are focusing on **Traffic Traffic**, we won't waste time on features like parking. Instead, we will simulate attacks on the things we have already built: **Traffic Lights, Heuristic Sensors, and Emergency Overrides.**
-
----
-
-## 1. The "Lying Sensor" Attack (Data Falsification)
-
-### 🧐 The Scenario
-Imagine a hacker takes control of a roadside sensor (the "Infrastructure Operator"). They want to clear a path for themselves, so they send data to the blockchain saying, *"There are 0 cars at my intersection,"* even though the road is actually packed.
-
-### 🛠️ The Implementation
-We will add a "Malicious Mode" toggle in our simulator or dashboard. When turned on, the system will try to send "Impossible Data" to the blockchain (e.g., negative vehicle counts or "LOW" congestion during a peak hour).
-
-### 📖 The Blockchain Lesson
-We will update our **Smart Contract (Chaincode)** to include "Sanity Checks." 
-*   **Result:** The Blockchain will reject the data before it's even saved. 
-*   **Proof:** We can show the professor an "Invalid Transaction" error in the logs, proving the blockchain caught the lie.
+We aren't just building a database; we are building an **Intelligent Guardian**.
+*   **The Blockchain** is the "Enforcer": It follows strict rules and blocks any "bad" transactions.
+*   **The Mini-SOC** is the "Detective": It uses AI (Mistral 7B) to analyze *why* someone attacked us and uses n8n to alert the humans.
 
 ---
 
-## 2. The "Imposter" Attack (Privilege Escalation)
+## 🏗️ The 4-Layer Architecture (Layman's Terms)
 
-### 🧐 The Scenario
-Only the **Emergency Services** organization should be allowed to force a traffic light to stay Green for an ambulance. Imagine a regular civilian vehicle (the "Vehicle Operator") tries to use that same "Emergency Green" command to skip traffic.
+### 1. The Threat Layer (The Attack Simulator)
+Instead of a simple dashboard, we have a dedicated **Attack Simulator** folder. This is a special script that "acts" like a hacker.
+*   **Location**: `simulator/attack-simulator`
+*   **Job**: It deliberately sends "bad" data or "stolen" identity credentials to the blockchain to see if the system catches it.
 
-### 🛠️ The Implementation
-We will create a button in the dashboard that tries to trigger an emergency override but uses the "ID Badge" (Security Certificate) of a regular vehicle instead of the Emergency Org.
+### 2. The Blockchain Layer (The Wall)
+Our Smart Contracts (`traffic` and `emergency`) check the data. 
+*   If the data is "impossible" (e.g., -50 cars), the Blockchain **rejects** it.
+*   If the user is unauthorized (e.g., a civilian changing lights), the Blockchain **blocks** it.
+*   **NEW**: The Blockchain now "shouts" (emits an Event) when it catches an attacker.
 
-### 📖 The Blockchain Lesson
-This demonstrates **Access Control**. The Blockchain looks at the "ID Badge" attached to the request.
-*   **Result:** The transaction will fail with an "Access Denied" error.
-*   **Proof:** This proves that the blockchain automatically enforces "Roles" and "Permissions."
+### 3. The AI Agent Layer (The Brain - Mini-SOC)
+Your AI agents listen to the Blockchain's "shouts":
+*   **Sensor Agent**: Captures the rejection message from the Blockchain.
+*   **Analyzer Agent (Mistral 7B)**: Receives the data. It asks: *"Is this just a typo, or is someone trying to hack the city?"* 
+*   **Responder Agent**: Formats the AI's opinion into a report.
 
----
-
-## 3. The "Race Condition" Attack (MVCC Conflict)
-
-### 🧐 The Scenario
-What happens if two different departments try to change the same traffic light at the exact same millisecond? One wants it **Red**, the other wants it **Green**. A normal database might get confused and crash or save both.
-
-### 🛠️ The Implementation
-We will build a "Conflict Generator" that sends two conflicting commands to the exact same intersection at the same time.
-
-### 📖 The Blockchain Lesson
-This shows off Fabric's **MVCC (Multi-Version Concurrency Control)**. 
-*   **Result:** The Blockchain accepts the first one that arrives and automatically kills the second one as "obsolete."
-*   **Proof:** One light turns Green, and the dashboard shows a "Conflict Rejected" message for the other, proving the network stays consistent.
+### 4. The Orchestration Layer (The Action - n8n)
+The Responder sends the report to **n8n**. n8n then:
+*   Sends an **Email Alert** to the city manager.
+*   Creates a **Security Ticket** with the AI's analysis.
 
 ---
 
-## 4. The "Traitor in the Room" Attack (Byzantine Fault)
+## 🚀 Step-by-Step Implementation for Teammates
 
-### 🧐 The Scenario
-Our PBFT (Consensus) requires multiple organizations to vote on a decision. What if one organization becomes "Byzantine" (a traitor) and tries to stop the vote or send a wrong result to sabotage the city?
+To implement this on your end, follow these 4 steps:
 
-### 🛠️ The Implementation
-In our **Consensus Lab**, we will simulate a "Malicious Voter." When we run a PBFT test, we will force one of the 4 organizations to "refuse to vote" or send a "corrupted" vote.
+### Step 1: Secure the Chaincode (The Wall)
+We have added "Gatekeeper" code.
+*   **Check logic**: `if (vehicleCount < 0) throw new Error(...)`
+*   **Check ID**: `if (mspId !== 'EmergencyServices') throw new Error(...)`
 
-### 📖 The Blockchain Lesson
-This proves **Consensus Resilience**. 
-*   **Result:** Since PBFT only needs a majority (3 out of 4) to agree, the transaction will **still succeed** despite the traitor.
-*   **Proof:** We show the professor that the City keeps running perfectly even if one-fourth of the network is compromised.
+### Step 2: Set up the Attack Simulator
+In the `simulator/attack-simulator` folder, we create scripts that:
+*   Try to send negative vehicle counts.
+*   Try to trigger emergency overrides using a non-emergency identity.
+
+### Step 3: Set up the Blockchain Listener (The Sensor Agent)
+In our backend (`application/backend`), we add a script that stays awake and listens for any `SecurityAlert` events. It then forwards these to the **Mini-SOC Sensor Agent**.
+
+### Step 4: Connect the AI and n8n
+When an alert is captured, we send the details to **Mistral 7B** and then to your **n8n Webhook**.
 
 ---
 
-## 🚀 Summary for the Team
-By implementing these 4 simulations, we show that our system is:
-1.  **Truthful** (Blocks lying sensors).
-2.  **Orderly** (Blocks unauthorized users).
-3.  **Stable** (Blocks conflicting data).
-4.  **Resilient** (Survives malicious sabotage).
+## 🧪 Simulation Scenarios (What we will show the Professor)
 
-This strategy covers the most important technical parts of the course without needing to build extra features that aren't our responsibility!
+### Scenario A: The "Crazy Sensor"
+1.  **Attack**: run `node simulator/attack-simulator/lyingSensor.js`.
+2.  **Blockchain**: Rejects the data because it's "physically impossible."
+3.  **AI (Mini-SOC)**: Analyzes and says: *"This looks like a hardware malfunction."*
+4.  **n8n**: Sends an email to the **Maintenance Team**.
+
+### Scenario B: The "Imposter Authority"
+1.  **Attack**: run `node simulator/attack-simulator/imposterHack.js`.
+2.  **Blockchain**: Blocks the user (Wrong MSP ID).
+3.  **AI (Mini-SOC)**: Warns: *"High Alert! Privilege Escalation attempt."*
+4.  **n8n**: Sends an email to the **Police/Security Team**.
