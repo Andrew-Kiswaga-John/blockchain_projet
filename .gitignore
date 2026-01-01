@@ -65,3 +65,6 @@ commands.txt
 # Package lock files (optional - uncomment if not sharing)
 # package-lock.json
 # yarn.lock
+
+# Python Environment
+minisoc/venv/

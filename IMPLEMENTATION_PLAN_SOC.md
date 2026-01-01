@@ -35,15 +35,14 @@ We need the backend to listen for attacks.
 
 ---
 
-## 📂 Phase 3: The AI Detective (Mini-SOC Agents)
-We will point your existing Python agents to our system.
+## 📂 Phase 3: The AI Detective (Mini-SOC Agents) [DONE!]
+Your agents are now ready in `minisoc/agents/`.
 
-### [MODIFY] `minisoc/agents/analyzer_agent.py`
-*   **Prompt Update**: We will update the system instructions so Mistral knows it is monitoring a Smart City. 
-*   **Logic**: It will now classify "Blockchain Rejections" into categories like *Hardware Malfunction*, *Brute Force*, or *Unauthorized Access*.
+*   **sensor_agent.py**: The "Ear" that catches blockchain events.
+*   **analyzer_agent.py**: The "Brain" that connects to Mistral 7B.
+*   **responder_agent.py**: The "Mouth" that shouts to n8n.
 
-### [MODIFY] `minisoc/agents/responder_agent.py`
-*   **Logic**: It will send the final alert to your **n8n Webhook URL**.
+**Follow the [SETUP_GUIDE.md](file:///c:/Users/Asus/Documents/S3/BLOCKCHAIN/ATELIER1/minisoc/SETUP_GUIDE.md) for step-by-step instructions.**
 
 ---
 
