@@ -11,7 +11,7 @@ const { Contract } = require('fabric-contract-api');
  * - Emergency vehicle tracking
  * - Coordination between Emergency Services, Traffic Authority, and Infrastructure
  * 
- * Deployed on: emergency-channel
+ * Deployed on: emergency-ops
  * Organizations: EmergencyServices, TrafficAuthority, InfrastructureOperator
  */
 class EmergencyContract extends Contract {

@@ -23,7 +23,7 @@ We will create a simple line: `Webhook -> Gmail`
 1.  In the Gmail node window, find "Credential to connect with".
 2.  Click **"Select Credential"** -> **"Create New"**.
 3.  Select **"Sign in with Google"**.
-4.  A popup will appear. Login with `andrewkiswaga8@gmail.com`.
+4.  A popup will appear. Login with `abc@gmail.com`.
 5.  Click **"Allow"** to give n8n permission to send emails.
 6.  Once connected, close the credential window.
 
@@ -33,7 +33,7 @@ We will create a simple line: `Webhook -> Gmail`
 
 Now we fill in the blanks. We want to use the data from the AI!
 
-1.  **To:** Type `andrewkiswaga8@gmail.com`
+1.  **To:** Type `abc@gmail.com`
 2.  **Subject:** 
     *   Click the little **Expression (gear/fns)** icon next to the field.
     *   Type this: `🚨 ALERT: {{ $json.body.subject }}`

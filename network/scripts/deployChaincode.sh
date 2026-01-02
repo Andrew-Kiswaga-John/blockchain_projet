@@ -189,7 +189,7 @@ commitChaincodeDefinition() {
         PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses peer0.emergency.example.com:13051 --tlsRootCertFiles $PEER0_EMERGENCY_CA"
         PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses peer0.parking.example.com:15051 --tlsRootCertFiles $PEER0_PARKING_CA"
     else
-        # emergency-channel: 3 organizations
+        # emergency-ops: 3 organizations
         PEER_CONN_PARMS="--peerAddresses peer0.trafficauthority.example.com:7051 --tlsRootCertFiles $PEER0_TRAFFICAUTHORITY_CA"
         PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses peer0.infrastructure.example.com:11051 --tlsRootCertFiles $PEER0_INFRASTRUCTURE_CA"
         PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses peer0.emergency.example.com:13051 --tlsRootCertFiles $PEER0_EMERGENCY_CA"
@@ -247,7 +247,7 @@ initChaincode() {
             PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses peer0.emergency.example.com:13051 --tlsRootCertFiles $PEER0_EMERGENCY_CA"
             PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses peer0.parking.example.com:15051 --tlsRootCertFiles $PEER0_PARKING_CA"
         else
-            # emergency-channel: 3 organizations
+            # emergency-ops: 3 organizations
             PEER_CONN_PARMS="--peerAddresses peer0.trafficauthority.example.com:7051 --tlsRootCertFiles $PEER0_TRAFFICAUTHORITY_CA"
             PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses peer0.infrastructure.example.com:11051 --tlsRootCertFiles $PEER0_INFRASTRUCTURE_CA"
             PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses peer0.emergency.example.com:13051 --tlsRootCertFiles $PEER0_EMERGENCY_CA"
