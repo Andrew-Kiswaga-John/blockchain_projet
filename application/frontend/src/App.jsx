@@ -1,196 +1,66 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster, toast } from 'react-hot-toast';
 import io from 'socket.io-client';
-import TrafficMap from './components/TrafficMap';
-import EmergencyControl from './components/EmergencyControl';
-import IntersectionControl from './components/IntersectionControl';
-import ConsensusLab from './components/ConsensusLab';
-import { getIntersections, getEmergencies, createEmergency, createIntersection, getTrafficStats } from './services/api';
-import './App.css';
 
-const socket = io('http://localhost:3000');
+
+import DashboardLayout from './layouts/DashboardLayout';
+import Dashboard from './pages/Dashboard';
+import BlockchainInspector from './pages/BlockchainInspector';
+import NetworkManager from './pages/NetworkManager';
+import ConsensusLab from './pages/ConsensusLab';
 
 function App() {
-  const [intersections, setIntersections] = useState([]);
-  const [emergencies, setEmergencies] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [showEmergencyPanel, setShowEmergencyPanel] = useState(false);
-  const [showIntersectionPanel, setShowIntersectionPanel] = useState(false);
-  const [showConsensusLab, setShowConsensusLab] = useState(false);
-  const [stats, setStats] = useState({});
 
-  // Load initial data
+  // SOC Alert Listener
   useEffect(() => {
-    loadData();
-    const interval = setInterval(loadData, 5000); // Poll every 5s (in addition to sockets)
-    return () => clearInterval(interval);
-  }, []);
+    const socket = io('http://localhost:3000'); // Connect to backend
 
-  // WebSocket listeners
-  useEffect(() => {
-    socket.on('traffic:update', (data) => {
-      // Optimistic update or refresh
-      loadData();
+    socket.on('soc:alert', (alert) => {
+      // High-Tech Notification Sound here (optional)
+
+      toast.custom((t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#1e293b] border-l-4 border-red-500 shadow-2xl rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}>
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0 pt-0.5">
+                <span className="h-10 w-10 text-2xl">🚨</span>
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-white">
+                  SECURITY BREACH DETECTED
+                </p>
+                <p className="mt-1 text-sm text-red-400 font-bold">
+                  {alert.type}
+                </p>
+                <p className="mt-1 text-xs text-slate-400">
+                  {alert.message}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ), { duration: 5000 });
     });
 
-    socket.on('emergency:new', (data) => {
-      setEmergencies(prev => [...prev, data]);
-    });
-
-    return () => {
-      socket.off('traffic:update');
-      socket.off('emergency:new');
-    };
+    return () => socket.disconnect();
   }, []);
-
-  const loadData = async () => {
-    try {
-      const intsResponse = await getIntersections();
-      if (intsResponse.success && Array.isArray(intsResponse.data)) {
-        setIntersections(intsResponse.data);
-      }
-
-      const emgsResponse = await getEmergencies();
-      if (emgsResponse.success && Array.isArray(emgsResponse.data)) {
-        setEmergencies(emgsResponse.data);
-      }
-
-      const statsResponse = await getTrafficStats();
-      if (statsResponse.success && statsResponse.data) {
-        setStats(statsResponse.data);
-      }
-    } catch (error) {
-      console.error('Error loading data:', error);
-      setStats(prev => ({ ...prev, error: `Connection Error: ${error.message}` }));
-    }
-  };
-
-  const handleCreateEmergency = async (data) => {
-    try {
-      await createEmergency({
-        emergencyId: `EMG-${Date.now()}`,
-        ...data,
-        latitude: data.location.latitude,
-        longitude: data.location.longitude
-      });
-      setShowEmergencyPanel(false);
-      setSelectedLocation(null);
-      loadData(); // Refresh immediate
-    } catch (err) {
-      console.error("Failed to create emergency:", err);
-      alert("Failed to create emergency: " + err.message);
-    }
-  };
-
-  const handleCreateIntersection = async (data) => {
-    try {
-      await createIntersection({
-        ...data,
-        latitude: data.location.latitude,
-        longitude: data.location.longitude
-      });
-      setShowIntersectionPanel(false);
-      setSelectedLocation(null);
-      loadData(); // Refresh immediate
-    } catch (err) {
-      console.error("Failed to create intersection:", err);
-      alert("Failed to create intersection: " + err.message);
-    }
-  };
-
-  const toggleEmergencyPanel = () => {
-    setShowEmergencyPanel(!showEmergencyPanel);
-    setShowIntersectionPanel(false); // Close other panel
-    if (!showEmergencyPanel) {
-      setSelectedLocation(null);
-    }
-  };
-
-  const toggleConsensusLab = () => {
-    setShowConsensusLab(!showConsensusLab);
-    setShowEmergencyPanel(false);
-    setShowIntersectionPanel(false);
-  };
-
-  const toggleIntersectionPanel = () => {
-    setShowIntersectionPanel(!showIntersectionPanel);
-    setShowEmergencyPanel(false); // Close other panel
-    setShowConsensusLab(false);
-    if (!showIntersectionPanel) {
-      setSelectedLocation(null);
-    }
-  };
 
   return (
-    <div className="app">
-      <header className="header">
-        <h1>🏙️ Traffic Core - Tangier</h1>
-        <div className="header-stats">
-          {stats.error ? (
-            <span style={{ color: '#ff4444', fontWeight: 'bold' }}>⚠️ {stats.error}</span>
-          ) : (
-            <>
-              <span>🚦 Intersections: {intersections.length}</span>
-              <span>🚨 Active Emergencies: {emergencies.length}</span>
-              <span>🚗 Traffic Speed: {stats.averageSpeed || 0} km/h</span>
-            </>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            className="emergency-btn"
-            onClick={toggleIntersectionPanel}
-            style={{ backgroundColor: showIntersectionPanel ? '#2e7d32' : '#4caf50' }}
-          >
-            {showIntersectionPanel ? 'Cancel' : '➕ ADD INTERSECTION'}
-          </button>
-          <button
-            className="emergency-btn"
-            onClick={toggleEmergencyPanel}
-            style={{ backgroundColor: showEmergencyPanel ? '#b71c1c' : '#d32f2f' }}
-          >
-            {showEmergencyPanel ? 'Cancel' : '⚠️ DEPLOY EMERGENCY'}
-          </button>
-          <button
-            className="emergency-btn"
-            onClick={toggleConsensusLab}
-            style={{ backgroundColor: showConsensusLab ? '#1565c0' : '#2196f3' }}
-          >
-            {showConsensusLab ? 'Close Lab' : '🧬 CONSENSUS LAB'}
-          </button>
-        </div>
-      </header>
+    <BrowserRouter>
+      {/* Toast Container */}
+      <Toaster position="top-right" />
 
-      <div className="map-wrapper" style={{ height: 'calc(100vh - 60px)', position: 'relative' }}>
-        <TrafficMap
-          intersections={intersections}
-          emergencies={emergencies}
-          onLocationSelect={setSelectedLocation}
-          isSelectingLocation={showEmergencyPanel || showIntersectionPanel}
-        />
-
-        {showEmergencyPanel && (
-          <EmergencyControl
-            onDeploy={handleCreateEmergency}
-            onClose={() => setShowEmergencyPanel(false)}
-            selectedLocation={selectedLocation}
-          />
-        )}
-
-        {showIntersectionPanel && (
-          <IntersectionControl
-            onCreate={handleCreateIntersection}
-            onClose={() => setShowIntersectionPanel(false)}
-            selectedLocation={selectedLocation}
-          />
-        )}
-
-        {showConsensusLab && (
-          <ConsensusLab
-            onClose={() => setShowConsensusLab(false)}
-          />
-        )}
-      </div>
-    </div>
+      <Routes>
+        <Route path="/" element={<DashboardLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="network" element={<NetworkManager />} />
+          <Route path="consensus" element={<ConsensusLab />} />
+          <Route path="blockchain" element={<BlockchainInspector />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

@@ -78,15 +78,23 @@ io.on('connection', (socket) => {
     });
 });
 
+const blockListener = require('./services/blockListener');
+
+// ... (existing imports)
+
+// ...
+
 // Initialize Fabric client
 async function init() {
     try {
         console.log('🚀 Starting Traffic Core Backend...');
-        // await fabricClient.initialize(); // Let's try-catch this explicitly inside
 
         try {
             await fabricClient.initialize();
             console.log('✓ Fabric Client connected successfully.');
+
+            // Start Block Listener
+            await blockListener.start(io);
         } catch (err) {
             console.error('❌ Fabric Client Initialization FAILED:', err.message);
             console.error('Stack:', err.stack);

@@ -45,7 +45,7 @@ const LocationMarker = ({ setLocation, isSelecting }) => {
     return null;
 }
 
-const TrafficMap = ({ intersections, emergencies, onLocationSelect, isSelectingLocation }) => {
+const TrafficMap = ({ intersections = [], emergencies = [], onLocationSelect, isSelectingLocation }) => {
     const tangierCenter = [35.7767, -5.8039];
 
     return (

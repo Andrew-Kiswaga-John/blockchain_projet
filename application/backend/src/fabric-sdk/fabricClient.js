@@ -135,6 +135,11 @@ class FabricClient {
         return network.getContract(contractName);
     }
 
+    async getNetwork(channelName, orgName = 'TrafficAuthority') {
+        const gateway = await this.connectGateway(orgName);
+        return await gateway.getNetwork(channelName);
+    }
+
     async disconnect() {
         for (const [org, gateway] of Object.entries(this.gateways)) {
             gateway.disconnect();
