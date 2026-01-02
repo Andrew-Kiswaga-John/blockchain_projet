@@ -42,9 +42,13 @@ class TrafficSimulator {
         this.isUpdating = true;
 
         try {
+            // Fetch dynamic config
+            const config = await client.getSimulationConfig();
+            const densityMultiplier = config.density || 1.0;
+
             for (const intersection of this.intersections) {
-                // Randomize traffic data
-                const fluctuation = Math.floor(Math.random() * 10) - 3; // -3 to +6 vehicles
+                // Randomize traffic data with density multiplier
+                const fluctuation = Math.floor((Math.random() * 10 - 3) * densityMultiplier);
                 intersection.vehicleCount = Math.max(0, intersection.vehicleCount + fluctuation);
 
                 // Limit max vehicles for realism

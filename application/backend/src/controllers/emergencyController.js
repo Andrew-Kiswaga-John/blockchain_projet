@@ -22,7 +22,14 @@ class EmergencyController {
     // Create emergency
     async createEmergency(req, res) {
         try {
-            const { emergencyId, type, severity, latitude, longitude, address, description } = req.body;
+            const { type, severity, location, address, description } = req.body;
+            const emergencyId = req.body.id || req.body.emergencyId;
+            const latitude = location?.latitude ?? req.body.latitude;
+            const longitude = location?.longitude ?? req.body.longitude;
+
+            if (!emergencyId || !latitude || !longitude) {
+                return res.status(400).json({ success: false, error: 'Missing required fields: id, latitude, or longitude' });
+            }
             const orgName = req.header('x-org-name') || 'EmergencyServices';
             const contract = await fabricClient.getContract('emergency-ops', 'emergency-contract', orgName);
 

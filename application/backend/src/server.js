@@ -5,6 +5,7 @@ const socketIO = require('socket.io');
 require('dotenv').config();
 
 const fabricClient = require('./fabric-sdk/fabricClient');
+const socService = require('./services/socService');
 const trafficRoutes = require('./routes/traffic');
 const emergencyRoutes = require('./routes/emergency');
 
@@ -16,6 +17,9 @@ const io = socketIO(server, {
         methods: ['GET', 'POST']
     }
 });
+
+// Initialize SOC Service
+socService.init(io);
 
 // Middleware
 app.use(cors());

@@ -29,6 +29,15 @@ class TrafficClient {
         }
     }
 
+    async getSimulationConfig() {
+        try {
+            const response = await axios.get(`${API_URL}/traffic/config`);
+            return response.data.data;
+        } catch (error) {
+            return { density: 1.0 }; // Default fallback
+        }
+    }
+
     async registerVehicle(vehicle) {
         // Mock registration logic if needed
     }

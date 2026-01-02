@@ -4,6 +4,11 @@ class SOCService {
     constructor() {
         this.agentUrl = process.env.SOC_AGENT_URL || 'http://localhost:5000/report';
         this.enabled = true;
+        this.io = null;
+    }
+
+    init(io) {
+        this.io = io;
     }
 
     /**
@@ -30,7 +35,17 @@ class SOCService {
         console.log(`[SOC-BRIDGE] 🔔 Alerting Mini-SOC: ${payload.type}`);
 
         try {
-            // Forwarding to the AI Agent (Python Sensor)
+            // 1. Alert the Frontend Dashboard
+            if (this.io) {
+                this.io.emit('soc:alert', {
+                    type: payload.type,
+                    message: payload.details.message,
+                    severity: payload.severity,
+                    timestamp: payload.timestamp
+                });
+            }
+
+            // 2. Forwarding to the AI Agent (Python Sensor)
             // Note: If the agent isn't running, we log it but don't crash
             await axios.post(this.agentUrl, payload).catch(err => {
                 console.warn(`[SOC-BRIDGE] ⚠️ Mini-SOC Agent unreachable at ${this.agentUrl}. (Is the Python agent running?)`);

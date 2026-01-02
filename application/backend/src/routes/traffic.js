@@ -12,4 +12,8 @@ router.post('/data', trafficController.recordTrafficData);
 router.put('/light', trafficController.updateTrafficLight);
 router.get('/statistics', trafficController.getTrafficStats);
 
+// Simulation Config Routes
+router.get('/config', trafficController.getSimulationConfig);
+router.post('/config', trafficController.updateSimulationConfig);
+
 module.exports = router;

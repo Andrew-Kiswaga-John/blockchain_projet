@@ -40,3 +40,13 @@ export const exportConsensusReport = async (results) => {
     return response.data;
 };
 
+export const updateSimulationConfig = async (config) => {
+    const response = await api.post('/traffic/config', config);
+    return response.data;
+};
+
+export const getSimulationConfig = async () => {
+    const response = await api.get('/traffic/config');
+    return response.data;
+};
+

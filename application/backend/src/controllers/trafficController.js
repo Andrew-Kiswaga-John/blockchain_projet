@@ -2,6 +2,18 @@ const fabricClient = require('../fabric-sdk/fabricClient');
 const socService = require('../services/socService');
 
 class TrafficController {
+    constructor() {
+        this.simulationConfig = { density: 1.0 };
+        // Bind methods
+        this.getAllIntersections = this.getAllIntersections.bind(this);
+        this.createIntersection = this.createIntersection.bind(this);
+        this.recordTrafficData = this.recordTrafficData.bind(this);
+        this.updateTrafficLight = this.updateTrafficLight.bind(this);
+        this.getTrafficStats = this.getTrafficStats.bind(this);
+        this.getIntersectionHistory = this.getIntersectionHistory.bind(this);
+        this.getSimulationConfig = this.getSimulationConfig.bind(this);
+        this.updateSimulationConfig = this.updateSimulationConfig.bind(this);
+    }
 
     // Get all intersections
     async getAllIntersections(req, res) {
@@ -22,13 +34,21 @@ class TrafficController {
     // Create new intersection
     async createIntersection(req, res) {
         try {
-            const { intersectionId, name, latitude, longitude } = req.body;
+            const { name, location } = req.body;
+            const intersectionId = req.body.id || req.body.intersectionId;
+            const latitude = location?.latitude ?? req.body.latitude;
+            const longitude = location?.longitude ?? req.body.longitude;
+
+            if (!intersectionId || !latitude || !longitude) {
+                return res.status(400).json({ success: false, error: 'Missing required fields: id, latitude, or longitude' });
+            }
+
             const contract = await fabricClient.getContract('city-traffic-global', 'traffic-contract');
 
             await contract.submitTransaction(
                 'createIntersection',
                 intersectionId,
-                name,
+                name || 'Unnamed Intersection',
                 latitude.toString(),
                 longitude.toString()
             );
@@ -136,6 +156,30 @@ class TrafficController {
             });
         } catch (error) {
             console.error('Error getting intersection history:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // Get simulation configuration
+    async getSimulationConfig(req, res) {
+        res.json({
+            success: true,
+            data: this.simulationConfig
+        });
+    }
+
+    // Update simulation configuration
+    async updateSimulationConfig(req, res) {
+        try {
+            const { density } = req.body;
+            if (density) this.simulationConfig.density = parseFloat(density);
+
+            res.json({
+                success: true,
+                message: 'Simulation configuration updated',
+                data: this.simulationConfig
+            });
+        } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
     }
