@@ -1,47 +1,54 @@
-# 🏙️ Traffic Core - Smart City Traffic Management Blockchain
+# 🏙️ Traffic Core - Gestion du Trafic par Blockchain pour Smart City
 
-[![Project Status: Complete](https://img.shields.io/badge/Project%20Status-Complete-brightgreen)](README.md)
-[![Hyperledger Fabric](https://img.shields.io/badge/Platform-Hyperledger%20Fabric%20v2.5-blue)](https://www.hyperledger.org/use/fabric)
+[![Statut du Projet : Terminé](https://img.shields.io/badge/Statut-Terminé-brightgreen)](README.md)
+[![Hyperledger Fabric](https://img.shields.io/badge/Plateforme-Hyperledger%20Fabric%20v2.5-blue)](https://www.hyperledger.org/use/fabric)
+[![Rapport Technique](https://img.shields.io/badge/Rapport-Technique%20(PDF)-orange)](docs/report/blockchain_project.pdf)
 
-A decentralized, cyber-resilient traffic management system for modern smart cities. This project features a multi-organization blockchain network, an AI-powered Security Operations Center (Mini-SOC), and a comparative consensus laboratory.
-
----
-
-## 🚀 Getting Started (Step-by-Step)
-
-The project setup is broken down into modular, easy-to-follow parts. **Please follow them in order:**
-
-### 1️⃣ Phase 1: Environment & File Sync
-[Setup WSL Ubuntu, create workspaces, and move project files to the Linux layer.](docs/setup/01-environment-sync.md)
-
-### 2️⃣ Phase 2: Blockchain Network
-[Install chaincode dependencies and launch the 6-Org Hyperledger network.](docs/setup/02-blockchain-network.md)
-
-### 3️⃣ Phase 3: Backend SDK Bridge
-[Initialize the Node.js API that connects the UI to the Ledger.](docs/setup/03-backend-sdk.md)
-
-### 4️⃣ Phase 4: Launch Client Apps
-[Start the Cyberpunk Dashboard, City Simulator, and AI Agents on Windows.](docs/setup/04-windows-apps.md)
-
-### 🏆 Phase 5: Evaluation Guide
-[The "Evaluation Script" for professors to grade the project's key features.](docs/setup/05-evaluation-guide.md)
+Un système de gestion du trafic décentralisé et cyber-résilient pour les villes intelligentes modernes. Ce projet intègre un réseau blockchain multi-organisations, un centre d'opérations de sécurité (Mini-SOC) propulsé par l'IA (Mistral 7B), et un laboratoire expérimental de comparaison de consensus.
 
 ---
 
-## 🏗️ System Architecture
-
-*   **Blockchain Engine**: Hyperledger Fabric with RAFT ordering.
-*   **Security Protocol**: AI-Driven Mini-SOC (Python Agents + n8n) monitoring blockchain integrity.
-*   **Analytics**: Real-time traffic visualization and consensus benchmarking (PBFT/PoA/RAFT).
-*   **Dashboard**: High-performance React (Vite) interface with real-time WebSockets.
+## 📑 Rapport Technique
+Le rapport complet détaillant l'architecture, le laboratoire de consensus et la couche de cyber-sécurité est disponible ici :  
+👉 **[Télécharger le Rapport Technique (PDF)](docs/report/blockchain_project.pdf)**
 
 ---
 
-## 👥 Course Information
+## 🚀 Guide de Démarrage (Étape par Étape)
 
-**Professor**: Pr. Ikram BEN ABDEL OUAHAB  
-**Module**: Blockchain & Smart Cities  
-**Master**: IASD - 2025/2026  
+L'installation du projet est divisée en plusieurs parties modulaires. **Veuillez les suivre dans l'ordre :**
+
+### 1️⃣ Phase 1 : Environnement & Synchronisation
+[Configuration de WSL Ubuntu, création des espaces de travail et transfert des fichiers.](docs/setup/01-environment-sync.md)
+
+### 2️⃣ Phase 2 : Réseau Blockchain
+[Installation des dépendances des chaincodes et lancement du réseau Hyperledger (6 Orgs).](docs/setup/02-blockchain-network.md)
+
+### 3️⃣ Phase 3 : Backend SDK Bridge
+[Initialisation de l'API Node.js faisant le pont entre l'UI et le Registre.](docs/setup/03-backend-sdk.md)
+
+### 4️⃣ Phase 4 : Lancement des Applications
+[Démarrage du Dashboard Cyberpunk, du Simulateur Citadin et des Agents IA sur Windows.](docs/setup/04-windows-apps.md)
+
+### 🏆 Phase 5 : Guide d'Évaluation
+[Scénario de test et guide d'évaluation pour les professeurs (Fonctionnalités clés).](docs/setup/05-evaluation-guide.md)
 
 ---
-*Created with ❤️ for Smart City Resilience.*
+
+## 🏗️ Architecture du Système
+
+*   **Moteur Blockchain** : Hyperledger Fabric avec consensus RAFT.
+*   **Protocole de Sécurité** : Mini-SOC piloté par l'IA (Agents Python + n8n) surveillant l'intégrité de la blockchain.
+*   **Analyses** : Visualisation du trafic en temps réel et benchmark de consensus (PBFT/PoA/RAFT).
+*   **Dashboard** : Interface React (Vite) haute performance avec WebSockets en temps réel.
+
+---
+
+## 👥 Informations Académiques
+
+**Professeure** : Pr. Ikram BEN ABDEL OUAHAB  
+**Module** : Blockchain 
+**Master** : IASD - 2025/2026  
+
+---
+*Développé avec ❤️ pour la résilience urbaine.*
