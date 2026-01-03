@@ -68,3 +68,8 @@ commands.txt
 
 # Python Environment
 minisoc/venv/
+
+# Documentation & Report
+docs/FIGURE_GENERATION_PROMPTS.md
+docs/REPORT_STRUCTURE.md
+docs/report/main.tex
