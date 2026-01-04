@@ -18,7 +18,7 @@ Le rapport complet détaillant l'architecture, le laboratoire de consensus et la
 Découvrez le système en action à travers cette simulation fonctionnelle complète (7 min).  
 Elle couvre le dashboard cyberpunk, le consensus lab, et la détection d'attaques par l'IA.
 
-https://github.com/Andrew-Kiswaga-John/blockchain_projet/assets/simulation_video.mp4
+https://github.com/Andrew-Kiswaga-John/blockchain_projet/docs/demo/simulation_video.mp4
 
 > [!NOTE]
 > *Si la vidéo ne s'affiche pas directement ci-dessus, vous pouvez la trouver dans :* `docs/demo/simulation_video.mp4`
