@@ -14,11 +14,11 @@ Le rapport complet détaillant l'architecture, le laboratoire de consensus et la
 
 ---
 
-## 🎥 Video Demonstration
-Watch the system in action (7 min).  
-This demo covers the cyberpunk dashboard, consensus lab, and AI-driven security operations.
+## 🎥 Démonstration Vidéo
+Découvrez le système en action (7 min).  
+Cette démonstration couvre le dashboard cyberpunk, le laboratoire de consensus et la cyber-sécurité pilotée par l'IA.
 
-<video src="https://github.com/Andrew-Kiswaga-John/blockchain_projet/raw/main/docs/demo/simulation_video.mp4" width="100%" controls></video>
+https://github.com/user-attachments/assets/461b4faa-465b-415e-82ba-04b14ed33d00
 
 ---
 
