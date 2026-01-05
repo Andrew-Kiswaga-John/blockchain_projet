@@ -18,11 +18,7 @@ Le rapport complet détaillant l'architecture, le laboratoire de consensus et la
 Découvrez le système en action à travers cette simulation fonctionnelle complète (7 min).  
 Elle couvre le dashboard cyberpunk, le consensus lab, et la détection d'attaques par l'IA.
 
-<div align="center">
-  <video src="docs/demo/simulation_video.mp4" width="100%" controls>
-    Votre navigateur ne supporte pas la lecture de vidéos HTML5. Vous pouvez télécharger la vidéo <a href="docs/demo/simulation_video.mp4">ici</a>.
-  </video>
-</div>
+![Démonstration Vidéo](docs/demo/simulation_video.mp4)
 
 ---
 
