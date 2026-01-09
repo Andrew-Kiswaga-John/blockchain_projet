@@ -57,6 +57,6 @@ L'installation du projet est divisée en plusieurs parties modulaires. **Veuille
 **Professeure** : Pr. Ikram BEN ABDEL OUAHAB  
 **Module** : Blockchain 
 **Master** : IASD - 2025/2026  
-
+**Membres du Groupe** : Khabali Ayoub, Andrew Kiswaga John, El Maimouni Motaouakel, Znita Mohammed
 ---
 *Développé avec ❤️ pour la résilience urbaine.*
